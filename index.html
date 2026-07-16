@@ -65,6 +65,8 @@ button{font-family:var(--body)}
 .eyebrow b{color:var(--volcanic);font-weight:700}
 .num{font-variant-numeric:tabular-nums}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skiplink{position:absolute;left:-9999px;top:0;background:var(--forest);color:#fff;padding:10px 16px;z-index:100;border-radius:0 0 10px 0;font-weight:700}
+.skiplink:focus{left:0}
 ::selection{background:var(--forest);color:var(--paper)}
 
 /* reveal-on-scroll */
@@ -79,7 +81,7 @@ button{font-family:var(--body)}
 }
 
 /* ============ NAV ============ */
-#topnav{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+#topnav{position:sticky;top:0;z-index:60;background:var(--paper);background:color-mix(in srgb,var(--paper) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
 #topnav .bar{display:flex;align-items:center;gap:14px;padding:10px clamp(14px,3vw,30px)}
 #topnav .brand{font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--ink);text-decoration:none;white-space:nowrap}
 #topnav .brand em{color:var(--forest);font-style:italic}
@@ -93,7 +95,7 @@ button{font-family:var(--body)}
 @media (prefers-reduced-motion:reduce){#progress{transition:none}}
 
 /* hike sub-nav (sticky within hikes region) */
-#hikenav{position:sticky;top:56px;z-index:50;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);display:none}
+#hikenav{position:sticky;top:56px;z-index:50;background:var(--paper);background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);display:none}
 #hikenav.show{display:block}
 #hikenav .rail{display:flex;gap:6px;overflow-x:auto;padding:8px clamp(14px,3vw,30px);scrollbar-width:none}
 #hikenav .rail::-webkit-scrollbar{display:none}
@@ -101,7 +103,7 @@ button{font-family:var(--body)}
 #hikenav a.active{border-color:var(--forest);color:var(--forest);background:var(--chip-easy)}
 
 /* ============ HERO ============ */
-#hero{position:relative;min-height:92svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;isolation:isolate}
+#hero{position:relative;min-height:92vh;min-height:92svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;isolation:isolate}
 #hero .sky{position:absolute;inset:0;z-index:-3;background:linear-gradient(180deg,var(--map-water) 0%,var(--paper) 78%)}
 #hero .ridges{position:absolute;inset:auto 0 0 0;z-index:-2;width:100%;height:52vh;min-height:300px}
 #hero .ridges svg{width:100%;height:100%;display:block}
@@ -142,19 +144,11 @@ section.block.tight{padding-top:clamp(30px,5vw,60px)}
 .hikephoto{margin:18px 0 4px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--surface)}
 .hikephoto img{display:block;width:100%;max-height:420px;object-fit:cover}
 .hikephoto figcaption{font-size:.74rem;color:var(--ink3);padding:8px 14px}
+.hikephoto img.fit-contain{object-fit:contain;background:var(--surface2)}
 #hero .hero-photo{position:absolute;inset:0;z-index:-4}
 #hero .hero-photo img{width:100%;height:100%;object-fit:cover}
-#hero .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--paper) 55%,transparent),color-mix(in srgb,var(--paper) 88%,transparent) 70%,var(--paper))}
+#hero .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(238,241,237,.6),rgba(238,241,237,.9) 70%,#EFF1ED);background:linear-gradient(180deg,color-mix(in srgb,var(--paper) 65%,transparent),color-mix(in srgb,var(--paper) 90%,transparent) 70%,var(--paper))}
 #hero .herocredit{position:absolute;bottom:6px;right:10px;font-size:.66rem;color:var(--ink3);z-index:1}
-.map-ctrl{position:absolute;display:flex;gap:6px;z-index:5}
-.map-ctrl.tl{top:10px;left:10px;flex-wrap:wrap;max-width:75%}
-.map-ctrl.tr{top:10px;right:10px;flex-direction:column}
-.mbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;min-width:34px;height:34px;cursor:pointer;font-weight:700;font-size:1rem;box-shadow:var(--shadow)}
-.mbtn.small{font-size:.74rem;font-weight:700;padding:0 10px;height:30px}
-.mbtn[aria-pressed="true"]{background:var(--forest);color:var(--paper);border-color:var(--forest)}
-#mapTip{position:absolute;pointer-events:none;z-index:6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.8rem;box-shadow:var(--shadow);max-width:230px;display:none;line-height:1.4}
-#mapTip b{font-family:var(--display);font-size:.95rem;display:block}
-#mapTip .t2{color:var(--ink2)}
 #mapNote{font-size:.74rem;color:var(--ink3);margin-top:8px;max-width:70ch}
 #mapSide{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-height:300px}
 #mapSide .placeholder{color:var(--ink3);font-size:.9rem;margin:auto 0;text-align:center;padding:20px}
@@ -163,18 +157,6 @@ section.block.tight{padding-top:clamp(30px,5vw,60px)}
 #mapSide .go{margin-top:auto;display:inline-block;background:var(--forest);color:#fff;border:none;padding:11px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.92rem;text-align:center;text-decoration:none}
 :root[data-theme="dark"] #mapSide .go,html:not([data-theme="light"]) #mapSide .go{color:var(--paper)}
 #mapSide .alt-mini{font-size:.82rem;color:var(--ink2)}
-.map-label{font-size:10px;fill:var(--ink3);font-family:var(--body);pointer-events:none}
-.town-dot{fill:var(--ink3)}
-.hike-pin{cursor:pointer}
-.hike-pin circle.core{fill:var(--volcanic);stroke:var(--paper);stroke-width:1.6;transition:r .15s}
-.hike-pin.dim{opacity:.25}
-.hike-pin.sel circle.core{fill:var(--forest)}
-.hike-pin circle.pulse{fill:none;stroke:var(--volcanic);stroke-width:1;opacity:.7;animation:pinPulse 2.4s infinite}
-.hike-pin.sel circle.pulse{stroke:var(--forest)}
-@keyframes pinPulse{0%{r:6;opacity:.55}70%{r:14;opacity:0}100%{r:14;opacity:0}}
-@media (prefers-reduced-motion:reduce){.hike-pin circle.pulse{animation:none;opacity:0}}
-.drive-route{fill:none;stroke:var(--ocean);stroke-width:1.6;stroke-dasharray:4 4;opacity:0;transition:opacity .3s}
-.drive-route.show{opacity:.85}
 
 /* chips & filters */
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 6px;align-items:center}
@@ -219,7 +201,7 @@ table.cmp th,table.cmp td{padding:10px 12px;text-align:left;border-bottom:1px so
 table.cmp thead th{position:sticky;top:0;background:var(--surface2);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);z-index:2}
 table.cmp tbody th{font-family:var(--display);font-size:.95rem;white-space:nowrap;background:var(--surface);position:sticky;left:0;z-index:1;border-right:1px solid var(--line-soft)}
 table.cmp tbody tr:hover td{background:var(--surface2)}
-.cmp .bar{height:7px;border-radius:5px;background:var(--surface2);position:relative;min-width:70px;margin-top:5px}
+.cmp .bar{height:7px;border-radius:5px;background:var(--surface2);position:relative;min-width:70px;margin-top:5px;overflow:hidden}
 .cmp .bar i{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--forest)}
 
 /* ============ HIKE SECTIONS ============ */
@@ -232,8 +214,8 @@ table.cmp tbody tr:hover td{background:var(--surface2)}
 @media (prefers-reduced-motion:reduce){.hike h2.tname .hw{opacity:1;transform:none}}
 .hike .tagline{font-family:var(--display);font-style:italic;font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--ink2);max-width:46ch}
 .alertbar{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:12px 15px;font-size:.88rem;margin:16px 0;border:1px solid}
-.alertbar.warn{background:var(--chip-adv);border-color:color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink)}
-.alertbar.bad{background:var(--chip-exp);border-color:color-mix(in srgb,var(--alert) 45%,transparent);color:var(--ink)}
+.alertbar.warn{background:var(--chip-adv);border-color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink)}
+.alertbar.bad{background:var(--chip-exp);border-color:var(--alert);border-color:color-mix(in srgb,var(--alert) 45%,transparent);color:var(--ink)}
 .alertbar b{color:inherit}
 .alertbar .ic{flex:none;margin-top:2px}
 .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:22px 0}
@@ -246,34 +228,18 @@ table.cmp tbody tr:hover td{background:var(--surface2)}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
 .panel h4{font-size:1.02rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .panel .cap{font-size:.72rem;color:var(--ink3);margin-top:8px;line-height:1.45}
-.routemap svg,.elev svg{width:100%;height:auto;display:block}
-.routemap .rm-track{fill:none;stroke:var(--volcanic);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.routemap .rm-alt{fill:none;stroke:var(--ocean);stroke-width:1.7;stroke-dasharray:5 4}
-.routemap .rm-closed{fill:none;stroke:var(--alert);stroke-width:2.2;stroke-dasharray:2.5 3.5}
-.routemap text{font-family:var(--body);font-size:6.4px;fill:var(--ink2)}
-.routemap text.big{font-size:7.2px;fill:var(--ink);font-weight:600}
-.routemap .water{fill:var(--map-water)}
-.routemap .land{fill:var(--map-land)}
-.routemap .contour{fill:none;stroke:var(--map-ridge);stroke-width:.6;opacity:.8}
-.rm-cursor{fill:var(--forest);stroke:var(--paper);stroke-width:1.4;opacity:0;transition:opacity .15s}
-.rm-cursor.on{opacity:1}
-.legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:10px;font-size:.72rem;color:var(--ink2)}
-.legend .li{display:inline-flex;align-items:center;gap:6px}
-.legend .sw{width:16px;height:0;border-top:2.5px solid var(--volcanic);border-radius:2px}
-.legend .sw.alt{border-top:2px dashed var(--ocean)}
-.legend .sw.closed{border-top:2.5px dashed var(--alert)}
+.elev svg{width:100%;height:auto;display:block}
 
 /* elevation */
 .elev{position:relative}
 .elev .ex-line{stroke:var(--line);stroke-width:1}
 .elev .ex-grid{stroke:var(--line-soft);stroke-width:.7}
-.elev .ex-area{fill:color-mix(in srgb,var(--forest) 22%,transparent)}
+.elev .ex-area{fill:var(--surface2);fill:color-mix(in srgb,var(--forest) 22%,transparent)}
 .elev .ex-path{fill:none;stroke:var(--forest);stroke-width:2}
 .elev text{font-family:var(--body);font-size:7px;fill:var(--ink3)}
 .elev .ex-cross{stroke:var(--volcanic);stroke-width:1;opacity:0}
 .elev .ex-dot{fill:var(--volcanic);opacity:0}
 .elev .ex-hit{fill:transparent;cursor:crosshair}
-#elevTipT{position:absolute;top:6px;left:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:.74rem;display:none;pointer-events:none;box-shadow:var(--shadow)}
 
 /* expandables */
 details.x{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:8px 0;overflow:hidden}
@@ -335,7 +301,7 @@ details.x .dx table td,details.x .dx table th{padding:7px 8px;border-bottom:1px 
 .safecard h4{display:flex;gap:9px;align-items:center;font-size:1rem}
 .safecard p,.safecard ul{font-size:.87rem;color:var(--ink2)}
 .safecard ul{padding-left:1.2em;margin:.3em 0}
-.emg{background:var(--chip-exp);border:1px solid color-mix(in srgb,var(--alert) 40%,transparent);border-radius:12px;padding:16px 18px;margin-top:16px}
+.emg{background:var(--chip-exp);border:1px solid var(--alert);border:1px solid color-mix(in srgb,var(--alert) 40%,transparent);border-radius:12px;padding:16px 18px;margin-top:16px}
 .emg b{font-size:1.05rem}
 
 /* footer */
@@ -351,6 +317,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
 </style>
 
 <!-- ================= NAV ================= -->
+<a class="skiplink" href="#map">Skip to the map and guide content</a>
 <header id="topnav">
   <div class="bar">
     <a class="brand" href="#hero">Te Ika-a-Māui <em>/ North Island Tracks</em></a>
@@ -386,7 +353,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
     <p class="sub">From a rock-climbing finish above a drowned-valley harbour in Northland to a wind-scoured alpine hut in the Tararua Range — ten researched, source-checked walks and tramps, with maps, gear lists, budgets and the honest hazards. Information last checked <strong>16 July 2026</strong>.</p>
     <div class="heroStats" role="list">
       <div class="hs" role="listitem"><div class="n num" data-count="10">0</div><div class="l">Tracks</div></div>
-      <div class="hs" role="listitem"><div class="n num" data-count="107" data-suffix=" km">0</div><div class="l">Combined distance</div></div>
+      <div class="hs" role="listitem"><div class="n num" data-count="123" data-suffix=" km">0</div><div class="l">Combined distance</div></div>
       <div class="hs" role="listitem"><div class="n num" data-count="1886" data-suffix=" m">0</div><div class="l">Highest point (Red Crater)</div></div>
       <div class="hs" role="listitem"><div class="n num" data-count="7">0</div><div class="l">Regions</div></div>
     </div>
@@ -417,7 +384,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
         <div class="placeholder">Select a pin on the map<br>— or tap a card below —<br>to see the hike summary here.</div>
       </aside>
     </div>
-    <p id="mapNote">Real maps: topographic (OpenTopoMap), satellite (Esri World Imagery) and street (OpenStreetMap) layers. Orange track lines are official geometry — DOC Tracks open data (CC-BY 4.0) where available, OpenStreetMap (ODbL) for the Escarpment, Mercer Bay and Deliverance Cove tracks. Still <strong>not a navigation device</strong> — carry the paper/offline map named in each guide, e.g. <a href="https://www.topomap.co.nz" target="_blank" rel="noopener">NZ Topo Map</a> or the official <a href="https://www.doc.govt.nz" target="_blank" rel="noopener">DOC track pages</a>. A text list of all hikes with the same details is in <a href="#compare">the comparison table</a>.</p>
+    <p id="mapNote">Real maps: topographic (OpenTopoMap), satellite (Esri World Imagery) and street (OpenStreetMap) layers. Orange track lines are official geometry — DOC Tracks open data (CC-BY 4.0) where available, OpenStreetMap (ODbL) for the Escarpment, Mercer Bay and Deliverance Cove tracks. Still <strong>not a navigation device</strong> — carry the paper/offline map named in each guide, e.g. <a href="https://www.topomap.co.nz" target="_blank" rel="noopener">NZ Topo Map</a> or the official <a href="https://www.doc.govt.nz" target="_blank" rel="noopener">DOC track pages</a>. A text list of all hikes with the same details is in <a href="#compare">the comparison table</a>. On touch screens, one finger scrolls the page — pan the maps with two fingers and pinch to zoom.</p>
   </div>
 </section>
 
@@ -444,7 +411,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
   <div class="container">
     <div class="sec-head"><span class="eyebrow rv">03 — <b>Compare</b></span><span class="rule"></span></div>
     <h2 class="rv">Every track, side by side</h2>
-    <p class="lede rv">Swipe sideways on a phone. Distance bars are scaled to the longest track (19.4&nbsp;km). Costs are indicative per adult and dated in each hike’s guide.</p>
+    <p class="lede rv">Swipe sideways on a phone. Distance bars are scaled to the longest listed track. Costs are indicative per adult and dated in each hike’s guide.</p>
     <div class="tablewrap rv2" tabindex="0" aria-label="Hike comparison table, scrolls horizontally">
       <table class="cmp" id="cmpTable"></table>
     </div>
@@ -479,7 +446,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
         <div class="bfield"><label for="bNights">Nights away</label><input id="bNights" type="number" min="0" max="7" value="1"></div>
         <div class="bfield"><label for="bKm">Return drive (km)</label><input id="bKm" type="number" min="0" max="2000" value="300"></div>
         <div class="bfield"><label for="bShuttle">Shuttle / transport</label>
-          <select id="bShuttle"><option value="0">Not needed</option><option value="1">Yes (typical operator fare)</option></select></div>
+          <select id="bShuttle"><option value="0">Not needed</option><option value="1">Yes (shuttle or train fare)</option></select></div>
         <div class="bfield"><label for="bHire">Equipment hire</label>
           <select id="bHire"><option value="0">None</option><option value="basic">Boots/pack (~$30/day pp)</option><option value="alpine">Alpine kit incl. ice axe/crampons (~$50/day pp)</option></select></div>
       </div>
@@ -1367,43 +1334,54 @@ const PHOTOS={
  mercer:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Te_Ahua_Point_IMG_20140322_113803.jpg/1920px-Te_Ahua_Point_IMG_20140322_113803.jpg",page:"https://commons.wikimedia.org/wiki/File:Te_Ahua_Point_IMG_20140322_113803.jpg",credit:"Andrew Harvey",lic:"CC BY 2.0",cap:"Te Ahua Point and the cliff line south toward Whatipu"},
  escarpment:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Paekakariki_Escarpment_Track_Swing_Bridge_%2831034011486%29.jpg/1920px-Paekakariki_Escarpment_Track_Swing_Bridge_%2831034011486%29.jpg",page:"https://commons.wikimedia.org/wiki/File:Paekakariki_Escarpment_Track_Swing_Bridge_(31034011486).jpg",credit:"Daniel Walker",lic:"CC BY-SA 2.0",cap:"One of the two swing bridges on the Escarpment Track"},
  deliverance:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg/1920px-Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg",page:"https://commons.wikimedia.org/wiki/File:Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg",credit:"Pseudopanax",lic:"Public domain",cap:"Deliverance Cove and Castle Rock, toetoe in flower"},
- wairere:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Wairere_Falls_in_April_2010_and_May_2023.jpg/1920px-Wairere_Falls_in_April_2010_and_May_2023.jpg",page:"https://commons.wikimedia.org/wiki/File:Wairere_Falls_in_April_2010_and_May_2023.jpg",credit:"Johnragla",lic:"CC BY-SA 4.0",cap:"Wairere Falls at low and high flow (2010 / 2023)"},
+ wairere:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Wairere_Falls_in_April_2010_and_May_2023.jpg/1920px-Wairere_Falls_in_April_2010_and_May_2023.jpg",page:"https://commons.wikimedia.org/wiki/File:Wairere_Falls_in_April_2010_and_May_2023.jpg",credit:"Johnragla",lic:"CC BY-SA 4.0",cap:"Wairere Falls at low and high flow (2010 / 2023)",fit:"contain"},
  powell:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/New_Zealand%2C_Tararua_Mountains_-_around_Mt._Holdsworth_%2810%29.jpg/1920px-New_Zealand%2C_Tararua_Mountains_-_around_Mt._Holdsworth_%2810%29.jpg",page:"https://commons.wikimedia.org/wiki/File:New_Zealand,_Tararua_Mountains_-_around_Mt._Holdsworth_(10).jpg",credit:"Michal Klajban",lic:"CC BY-SA 4.0",cap:"Between Powell Hut and the Holdsworth summit"}
 };
 const GEOSRC={};HIKES.forEach(h=>{GEOSRC[h.id]=["escarpment","mercer","deliverance"].includes(h.id)?"© OpenStreetMap contributors (ODbL)":"DOC Tracks open data (CC-BY 4.0)"});
 const TRACKS={},MARKERS={},MINIS={};
 let mainMap=null,selectedHike=null,driveLine=null;
 function makeBases(){return{
- "Topo (OpenTopoMap)":L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | map style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}),
- "Satellite (Esri)":L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}),
- "Streets (OSM)":L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+ "Topo (OpenTopoMap)":L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,updateWhenIdle:true,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | map style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}),
+ "Satellite (Esri)":L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,updateWhenIdle:true,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}),
+ "Streets (OSM)":L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,updateWhenIdle:true,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 }}
 function flatLatLngs(gj){
- const segs=[];
+ let segs=[];
  (gj.features||[]).forEach(f=>{const g=f.geometry;if(!g)return;const lines=g.type==="LineString"?[g.coordinates]:g.coordinates;lines.forEach(l=>{if(l.length>1)segs.push(l.map(c=>[c[1],c[0]]))})});
  if(!segs.length)return[];
  const d2=(a,b)=>(a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]);
+ const M=m=>Math.pow(m/111000,2);
+ const mid=sg=>sg[Math.floor(sg.length/2)];
+ const kept=[];
+ segs.forEach(sg=>{const dup=kept.some(k=>{const ends=(d2(k[0],sg[0])<M(40)&&d2(k[k.length-1],sg[sg.length-1])<M(40))||(d2(k[0],sg[sg.length-1])<M(40)&&d2(k[k.length-1],sg[0])<M(40));return ends&&d2(mid(k),mid(sg))<M(60)});if(!dup)kept.push(sg)});
+ segs=kept;
  const chain=[segs.shift()];
  while(segs.length){
   const tail=chain[chain.length-1][chain[chain.length-1].length-1];
   let bi=0,bflip=false,bd=Infinity;
-  segs.forEach((sg,i)=>{
-   const ds=d2(tail,sg[0]),de=d2(tail,sg[sg.length-1]);
-   if(ds<bd){bd=ds;bi=i;bflip=false}
-   if(de<bd){bd=de;bi=i;bflip=true}
-  });
+  segs.forEach((sg,i)=>{const ds=d2(tail,sg[0]),de=d2(tail,sg[sg.length-1]);if(ds<bd){bd=ds;bi=i;bflip=false}if(de<bd){bd=de;bi=i;bflip=true}});
+  if(bd>M(1000)){segs.splice(bi,1);continue}
   const sg=segs.splice(bi,1)[0];
   chain.push(bflip?sg.slice().reverse():sg);
  }
  return chain.flat();
 }
-async function loadTracks(){await Promise.all(HIKES.map(async h=>{try{const r=await fetch("assets/tracks/"+h.id+".geojson?v=2");if(r.ok)TRACKS[h.id]=await r.json()}catch(e){TRACKS[h.id]=null}}))}
+const DATA_V="2026-07-16";
+async function loadTracks(){await Promise.all(HIKES.map(async h=>{try{const r=await fetch("assets/tracks/"+h.id+".geojson?v="+DATA_V);TRACKS[h.id]=r.ok?await r.json():null}catch(e){TRACKS[h.id]=null}}))}
+function twoFingerPan(map){
+ if(!L.Browser.mobile)return;
+ map.dragging.disable();
+ const el=map.getContainer();
+ el.addEventListener("touchstart",e=>{if(e.touches.length>=2)map.dragging.enable()},{passive:true});
+ el.addEventListener("touchend",()=>setTimeout(()=>map.dragging.disable(),0),{passive:true});
+}
 function hikeIcon(sel){return L.divIcon({className:"",html:'<div class="pinicon'+(sel?" sel":"")+'"></div>',iconSize:[18,18],iconAnchor:[9,9]})}
 function buildMap(){
  const bases=makeBases();
- mainMap=L.map("niMap").setView([-38.7,175.7],6);
+ mainMap=L.map("niMap",{scrollWheelZoom:false}).setView([-38.7,175.7],6);
  bases["Topo (OpenTopoMap)"].addTo(mainMap);
  L.control.layers(bases,null,{position:"topleft"}).addTo(mainMap);
+ twoFingerPan(mainMap);
  HIKES.forEach(h=>{
   if(TRACKS[h.id]){L.geoJSON(TRACKS[h.id],{style:{color:"#C2451E",weight:3,opacity:.9}}).on("click",()=>selectHike(h.id,false)).addTo(mainMap)}
   const mk=L.marker([h.lat,h.lon],{icon:hikeIcon(false),title:h.name,alt:h.name,keyboard:true}).addTo(mainMap);
@@ -1440,6 +1418,7 @@ function initMiniMap(h){
  const m=L.map(el,{scrollWheelZoom:false});
  bases["Topo (OpenTopoMap)"].addTo(m);
  L.control.layers(bases,null,{position:"topright"}).addTo(m);
+ twoFingerPan(m);
  let line=[];
  if(TRACKS[h.id]){
   const gl=L.geoJSON(TRACKS[h.id],{style:{color:"#C2451E",weight:4,opacity:.95}}).addTo(m);
@@ -1485,7 +1464,7 @@ function buildFilters(){
 function buildCards(){
  $("#cards").innerHTML=HIKES.map((h,i)=>`
   <article class="card rv" id="card-${h.id}" tabindex="0" role="link" aria-label="Open guide: ${esc(h.name)}" data-target="hike-${h.id}">
-   <div class="art">${cardArt(h.route.terrain,i)}<span class="rname">${esc(h.short)}</span></div>
+   <div class="art">${PHOTOS[h.id]?`<img loading="lazy" src="${PHOTOS[h.id].src.replace("/1920px-","/640px-")}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`:cardArt(h.route.terrain,i)}<span class="rname">${esc(h.short)}</span></div>
    <div class="body">
     <div class="meta">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}</div>
     <p class="desc">${esc(h.tagline)}</p>
@@ -1502,7 +1481,8 @@ function buildCards(){
 /* ==================== COMPARE TABLE ==================== */
 function buildCompare(){
  const head=["Track","Region","Distance","Time","Difficulty","High point","Type","Alpine exposure","Overnight?","Hut","Camping","Est. cost (pp)","Best season","Highlight","Popularity","Status"];
- const rows=HIKES.map(h=>{const x=CMP_EXTRA[h.id];const pct=Math.round(h.distKm/19.4*100);
+ const maxKm=Math.max(...HIKES.map(h=>h.distKm));
+ const rows=HIKES.map(h=>{const x=CMP_EXTRA[h.id];const pct=Math.round(h.distKm/maxKm*100);
   return `<tr>
    <th scope="row"><a href="#hike-${h.id}" style="color:inherit">${esc(h.short)}</a></th>
    <td>${REGIONS[h.region]}</td>
@@ -1515,24 +1495,6 @@ function buildCompare(){
  $("#cmpTable").innerHTML=`<thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody>`}
 
 /* ==================== ROUTE MAP + ELEVATION ==================== */
-const POI_STYLE={TH:["P","var(--forest)"],HUT:["H","var(--volcanic)"],TOILET:["T","var(--ocean)"],VIEW:["★","var(--tussock)"],HAZ:["!","var(--alert)"],JCT:["◆","var(--ink3)"],WTR:["W","var(--ocean)"],SHUT:["S","var(--forest-soft)"],EXIT:["E","var(--alert)"]};
-function polyToPath(pts){return "M"+pts.map(p=>p.join(" ")).join(" L")}
-function buildRouteSvg(h){
- const r=h.route;const main=polyToPath(r.path);
- const bgMap={volcano:`<circle class="contour" cx="160" cy="90" r="26"/><circle class="contour" cx="160" cy="90" r="16"/><circle class="contour" cx="40" cy="40" r="20"/>`,
-  cone:`<circle class="contour" cx="170" cy="95" r="30"/><circle class="contour" cx="170" cy="95" r="18"/><circle class="contour" cx="170" cy="95" r="8"/>`,
-  coast:`<path class="water" d="M0 0 H200 V26 C150 34 60 30 0 40 Z"/>`,
-  harbour:`<path class="water" d="M0 0 H200 V50 C160 66 120 56 96 70 C70 84 40 78 0 92 Z" />`,
-  range:`<path class="contour" d="M120 20 C140 40 150 70 175 100"/><path class="contour" d="M100 20 C122 44 132 74 158 108"/>`,
-  scarp:`<path class="contour" d="M70 10 C80 50 80 80 60 115"/><path class="contour" d="M90 8 C100 48 100 82 82 118"/>`};
- const arrows=r.path.slice(1,-1).filter((_,i)=>i%3===1).map((p,i,arr)=>{const idx=r.path.indexOf(p);const a=r.path[idx-1],b=r.path[idx+1];const ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;return `<path d="M-3 -2.4 L3 0 L-3 2.4 Z" fill="var(--volcanic)" transform="translate(${p[0]},${p[1]}) rotate(${ang})"/>`}).join("");
- const pois=r.pois.map(p=>{let pt;if(p[0]>=0){pt=r.path[Math.min(p[0],r.path.length-1)]}else{const cp=r.closed||r.path;pt=cp[Math.min(Math.abs(p[0]),cp.length-1)]}
-  const[sym,col]=POI_STYLE[p[1]];return `<g><circle cx="${pt[0]}" cy="${pt[1]}" r="3.6" fill="${col}" stroke="var(--paper)" stroke-width="1"/><text x="${pt[0]}" y="${pt[1]+1.9}" text-anchor="middle" style="font-size:4.6px;fill:#fff;font-weight:700">${sym}</text><text class="poilabel" x="${pt[0]+5.5}" y="${pt[1]+2}">${esc(p[2])}</text></g>`}).join("");
- const closed=r.closed?`<path class="rm-closed" d="${polyToPath(r.closed)}"/>`:"";
- return `<svg viewBox="-4 -4 208 128" role="img" aria-label="Schematic route map: ${esc(h.name)}. ${esc(r.caption)}">
-   <rect x="-4" y="-4" width="208" height="128" class="land" rx="6"/>${bgMap[r.terrain]||""}
-   ${closed}<path class="rm-track" d="${main}" id="rt-${h.id}"/>${arrows}${pois}
-   <circle class="rm-cursor" id="rc-${h.id}" r="4"/></svg>`}
 function buildElevSvg(h){
  const W=340,H=150,padL=34,padB=22,padT=12,padR=10;
  const pts=h.elev;const maxD=pts[pts.length-1][0];const els=pts.map(p=>p[1]);
@@ -1549,7 +1511,7 @@ function buildElevSvg(h){
   <line class="ex-cross" id="ec-${h.id}" y1="${padT}" y2="${H-padB}" x1="0" x2="0"/>
   <circle class="ex-dot" id="ed-${h.id}" r="3.5"/>
   <rect class="ex-hit" id="eh-${h.id}" x="${padL}" y="0" width="${W-padL-padR}" height="${H}" data-maxd="${maxD}" data-padl="${padL}" data-padr="${padR}" data-w="${W}"/></svg>
-  <div id="elevTipT" class="elevtip"></div>`}
+  <div class="elevtip"></div>`}
 function elevInteract(h,wrap){
  const hit=$("#eh-"+h.id,wrap);if(!hit)return;
  const cross=$("#ec-"+h.id,wrap),dot=$("#ed-"+h.id,wrap),tipEl=$(".elevtip",wrap);
@@ -1579,7 +1541,7 @@ function renderHikes(){
  $("#hikes").innerHTML=HIKES.map(h=>{
   const words=h.name.split(" ").map((w,i)=>`<span class="hw" style="--i:${i}">${esc(w)}</span>`).join(" ");
   const alertHtml=h.status.level==="open"?"":`<div class="alertbar ${h.status.level==="closed"?"bad":"warn"}"><span class="ic">${h.status.level==="closed"?"⛔":"⚠️"}</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`;
-  const okNote=h.status.level==="open"?`<div class="alertbar warn" style="background:var(--chip-easy);border-color:color-mix(in srgb,var(--good) 35%,transparent)"><span class="ic">✅</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`:"";
+  const okNote=h.status.level==="open"?`<div class="alertbar warn" style="background:var(--chip-easy);border-color:var(--good);border-color:color-mix(in srgb,var(--good) 35%,transparent)"><span class="ic">✅</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`:"";
   const e=h.essentials;
   return `<section class="hike block" id="hike-${h.id}" data-hike="${h.id}">
    <div class="region-water" aria-hidden="true">${REGIONS[h.region]}</div>
@@ -1589,7 +1551,7 @@ function renderHikes(){
     <p class="tagline">${esc(h.tagline)}</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}<span class="badge b-mod">🥾 ${esc(h.type)}</span>${h.overnight?'<span class="badge b-adv">🌙 Overnight</span>':""}</div>
     ${alertHtml||okNote}
-    ${PHOTOS[h.id]?`<figure class="hikephoto rv2"><img loading="lazy" src="${PHOTOS[h.id].src}" alt="${esc(PHOTOS[h.id].cap)}"><figcaption>${esc(PHOTOS[h.id].cap)} — photo: ${esc(PHOTOS[h.id].credit)}, <a href="${PHOTOS[h.id].page}" target="_blank" rel="noopener">${PHOTOS[h.id].lic} via Wikimedia Commons</a></figcaption></figure>`:""}
+    ${PHOTOS[h.id]?`<figure class="hikephoto rv2"><img loading="lazy" class="${PHOTOS[h.id].fit?"fit-contain":""}" src="${PHOTOS[h.id].src}" alt="${esc(PHOTOS[h.id].cap)}"><figcaption>${esc(PHOTOS[h.id].cap)} — photo: ${esc(PHOTOS[h.id].credit)}, <a href="${PHOTOS[h.id].page}" target="_blank" rel="noopener">${PHOTOS[h.id].lic} via Wikimedia Commons</a></figcaption></figure>`:""}
     <div class="statgrid">
      <div class="stat"><div class="n num" data-stat="${esc(h.stats.dist)}">${esc(h.stats.dist)}</div><div class="l">Distance</div></div>
      <div class="stat"><div class="n num">${esc(h.stats.time)}</div><div class="l">Walking time</div></div>
@@ -1680,14 +1642,15 @@ function calcBudget(){
  const id=$("#bHike").value,d=BUDGET_DEF[id],h=HIKES.find(x=>x.id===id);
  const mode=$("#bMode").value,stay=$("#bStay").value;
  const ppl=Math.max(1,+$("#bPeople").value||1),nights=Math.max(0,+$("#bNights").value||0),km=Math.max(0,+$("#bKm").value||0);
+ const nightsEff=(mode==="day")?nights:Math.max(1,nights);
  const rows=[];let total=0;const add=(l,v)=>{if(v>0){rows.push([l,v]);total+=v}};
  add("Fuel (~9 L/100 km @ $2.75/L)",Math.round(km*0.09*2.75));
- if(mode==="hut")add(`Hut fees (${nights||1} night${(nights||1)>1?"s":""} × ${ppl})`,(d.hut||20)*(nights||1)*ppl);
- if(mode==="camp")add(`Campsite fees (${nights||1} × ${ppl})`,(d.camp||15)*(nights||1)*ppl);
- if(stay==="budget")add(`Town accommodation — budget (${nights||1} × ${ppl})`,45*(nights||1)*ppl);
- if(stay==="mid")add(`Town accommodation — mid-range (${nights||1} × ${ppl})`,120*(nights||1)*ppl);
+ if(mode==="hut")add(`Hut fees (${nightsEff} night${nightsEff>1?"s":""} × ${ppl})`,(d.hut||20)*nightsEff*ppl);
+ if(mode==="camp")add(`Campsite fees (${nightsEff} × ${ppl})`,(d.camp||15)*nightsEff*ppl);
+ if(stay==="budget")add(`Town accommodation — budget (${nightsEff} × ${ppl})`,45*nightsEff*ppl);
+ if(stay==="mid")add(`Town accommodation — mid-range (${nightsEff} × ${ppl})`,120*nightsEff*ppl);
  if($("#bShuttle").value==="1")add(`Shuttle / transport (${ppl} pp)`,(d.shuttle||45)*ppl);
- const days=Math.max(1,nights+1);
+ const days=Math.max(1,nightsEff+1);
  add(`Food (${days} day${days>1?"s":""} × ${ppl})`,(mode==="day"?25:40)*days*ppl);
  const hire=$("#bHire").value;if(hire==="basic")add("Equipment hire — basic",30*days*ppl);if(hire==="alpine")add("Equipment hire — alpine kit",50*days*ppl);
  const lo=Math.round(total*0.85/5)*5, hi=Math.round(total*1.25/5)*5;
@@ -1734,7 +1697,14 @@ function initTheme(){
  $("#themeBtn").onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=cur==="dark"?"light":"dark"}}
 
 /* ==================== BOOT ==================== */
-initHero();buildFilters();buildCards();buildCompare();renderHikes();buildBudget();initObservers();initScroll();initTheme();
+initHero();
+(function(){
+ const t=Math.round(HIKES.reduce((a,h)=>a+h.distKm,0));
+ const el=document.querySelector('#hero [data-suffix=" km"]');if(el)el.dataset.count=t;
+ const maps={DIFFKEY,TYPEKEY,BUDGET_DEF,CMP_EXTRA,PHOTOS};
+ for(const[n,m]of Object.entries(maps)){const miss=HIKES.filter(h=>!(h.id in m)).map(h=>h.id);if(miss.length)console.error("Data map "+n+" missing ids:",miss)}
+})();
+buildFilters();buildCards();buildCompare();renderHikes();buildBudget();initObservers();initScroll();initTheme();
 loadTracks().then(()=>{
  buildMap();
  selectHike("tongariro",false);
