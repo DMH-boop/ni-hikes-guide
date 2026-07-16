@@ -1,0 +1,1746 @@
+<meta charset="utf-8">
+<title>North Island Tracks — An Interactive Hiking Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --paper:#EFF1ED; --surface:#FFFFFF; --surface2:#E4E8E1; --ink:#232A21; --ink2:#4C564C; --ink3:#6E7A6F;
+  --forest:#24513F; --forest-soft:#3A7258; --volcanic:#8C3B22; --ocean:#1F6180; --tussock:#9C7717; --tussock-bright:#B98F2E;
+  --line:#C9D0C6; --line-soft:#DDE2DA;
+  --good:#256C46; --warn:#8A5A00; --alert:#9E2F1C;
+  --chip-easy:#E2EFE6; --chip-mod:#E7ECF3; --chip-adv:#F5E8DF; --chip-exp:#F3E1DC;
+  --shadow:0 10px 30px rgba(20,30,22,.10);
+  --map-water:#D7E4E4; --map-land:#E9ECE2; --map-land2:#DFE5D6; --map-ridge:#C4CDBB;
+  --radius:14px;
+  --display:'Palatino Linotype','Iowan Old Style',Palatino,Georgia,'Times New Roman',serif;
+  --body:'Segoe UI','Helvetica Neue',Arial,system-ui,sans-serif;
+  --mono:'Cascadia Mono','Consolas','SF Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141819; --surface:#1C2223; --surface2:#232B2C; --ink:#E9ECE4; --ink2:#B4BEB2; --ink3:#8B968B;
+    --forest:#6FBF9B; --forest-soft:#4E9376; --volcanic:#E0764F; --ocean:#63B0CE; --tussock:#D9B45C; --tussock-bright:#D9B45C;
+    --line:#33403C; --line-soft:#28322F;
+    --good:#7CC79B; --warn:#E3B25E; --alert:#EA8A72;
+    --chip-easy:#1F3A2C; --chip-mod:#1E3340; --chip-adv:#42301F; --chip-exp:#452A20;
+    --shadow:0 10px 30px rgba(0,0,0,.45);
+    --map-water:#182225; --map-land:#20282A; --map-land2:#26302F; --map-ridge:#39473F;
+  }
+}
+:root[data-theme="light"]{
+  --paper:#EFF1ED; --surface:#FFFFFF; --surface2:#E4E8E1; --ink:#232A21; --ink2:#4C564C; --ink3:#6E7A6F;
+  --forest:#24513F; --forest-soft:#3A7258; --volcanic:#8C3B22; --ocean:#1F6180; --tussock:#9C7717; --tussock-bright:#B98F2E;
+  --line:#C9D0C6; --line-soft:#DDE2DA;
+  --good:#256C46; --warn:#8A5A00; --alert:#9E2F1C;
+  --chip-easy:#E2EFE6; --chip-mod:#E7ECF3; --chip-adv:#F5E8DF; --chip-exp:#F3E1DC;
+  --shadow:0 10px 30px rgba(20,30,22,.10);
+  --map-water:#D7E4E4; --map-land:#E9ECE2; --map-land2:#DFE5D6; --map-ridge:#C4CDBB;
+}
+:root[data-theme="dark"]{
+  --paper:#141819; --surface:#1C2223; --surface2:#232B2C; --ink:#E9ECE4; --ink2:#B4BEB2; --ink3:#8B968B;
+  --forest:#6FBF9B; --forest-soft:#4E9376; --volcanic:#E0764F; --ocean:#63B0CE; --tussock:#D9B45C; --tussock-bright:#D9B45C;
+  --line:#33403C; --line-soft:#28322F;
+  --good:#7CC79B; --warn:#E3B25E; --alert:#EA8A72;
+  --chip-easy:#1F3A2C; --chip-mod:#1E3340; --chip-adv:#42301F; --chip-exp:#452A20;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --map-water:#182225; --map-land:#20282A; --map-land2:#26302F; --map-ridge:#39473F;
+}
+
+/* ============ BASE ============ */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;font-size:16.5px;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.12;margin:0 0 .5em;text-wrap:balance;font-weight:600}
+h2{font-size:clamp(1.9rem,4.5vw,3.1rem)}
+h3{font-size:clamp(1.25rem,2.6vw,1.7rem)}
+p{margin:.4em 0 1em;max-width:68ch}
+a{color:var(--ocean);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2.5px solid var(--ocean);outline-offset:2px;border-radius:4px}
+button{font-family:var(--body)}
+.container{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.eyebrow{font-family:var(--body);text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:700;color:var(--ink3)}
+.eyebrow b{color:var(--volcanic);font-weight:700}
+.num{font-variant-numeric:tabular-nums}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+::selection{background:var(--forest);color:var(--paper)}
+
+/* reveal-on-scroll */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.rv.on{opacity:1;transform:none}
+.rv2{opacity:0;transition:opacity .9s ease}
+.rv2.on{opacity:1}
+.no-io .rv,.no-io .rv2{opacity:1 !important;transform:none !important}
+@media (prefers-reduced-motion: reduce){
+  .rv,.rv2{opacity:1 !important;transform:none !important;transition:none !important}
+  *{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+}
+
+/* ============ NAV ============ */
+#topnav{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+#topnav .bar{display:flex;align-items:center;gap:14px;padding:10px clamp(14px,3vw,30px)}
+#topnav .brand{font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--ink);text-decoration:none;white-space:nowrap}
+#topnav .brand em{color:var(--forest);font-style:italic}
+#navlinks{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#navlinks::-webkit-scrollbar{display:none}
+#navlinks a{color:var(--ink2);text-decoration:none;font-size:.86rem;font-weight:600;padding:7px 11px;border-radius:99px;white-space:nowrap}
+#navlinks a:hover{background:var(--surface2);color:var(--ink)}
+#navlinks a.active{background:var(--forest);color:var(--paper)}
+#themeBtn{margin-left:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:.95rem;flex:none}
+#progress{height:3px;background:linear-gradient(90deg,var(--forest),var(--tussock-bright),var(--volcanic));width:0%;transition:width .1s linear}
+@media (prefers-reduced-motion:reduce){#progress{transition:none}}
+
+/* hike sub-nav (sticky within hikes region) */
+#hikenav{position:sticky;top:56px;z-index:50;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);display:none}
+#hikenav.show{display:block}
+#hikenav .rail{display:flex;gap:6px;overflow-x:auto;padding:8px clamp(14px,3vw,30px);scrollbar-width:none}
+#hikenav .rail::-webkit-scrollbar{display:none}
+#hikenav a{flex:none;font-size:.78rem;font-weight:600;color:var(--ink3);text-decoration:none;padding:5px 10px;border:1px solid var(--line-soft);border-radius:99px;background:var(--surface)}
+#hikenav a.active{border-color:var(--forest);color:var(--forest);background:var(--chip-easy)}
+
+/* ============ HERO ============ */
+#hero{position:relative;min-height:92svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;isolation:isolate}
+#hero .sky{position:absolute;inset:0;z-index:-3;background:linear-gradient(180deg,var(--map-water) 0%,var(--paper) 78%)}
+#hero .ridges{position:absolute;inset:auto 0 0 0;z-index:-2;width:100%;height:52vh;min-height:300px}
+#hero .ridges svg{width:100%;height:100%;display:block}
+#hero .inner{padding:14vh clamp(16px,5vw,60px) 20vh}
+#hero .kicker{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+#hero .kicker .rule{height:1px;width:64px;background:var(--volcanic)}
+#heroTitle{font-size:clamp(2.6rem,8.4vw,6.4rem);font-weight:700;letter-spacing:-.01em;max-width:12ch}
+#heroTitle .w{display:inline-block;opacity:0;transform:translateY(.55em) rotate(1.5deg);animation:wordUp .8s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*.09s)}
+#heroTitle .w.it{font-style:italic;color:var(--forest)}
+@keyframes wordUp{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#heroTitle .w{opacity:1;transform:none;animation:none}}
+#hero .sub{font-size:clamp(1rem,1.9vw,1.25rem);color:var(--ink2);max-width:52ch;margin-top:14px}
+#hero .heroStats{display:flex;gap:clamp(18px,4vw,46px);margin-top:34px;flex-wrap:wrap}
+#hero .hs .n{font-family:var(--display);font-size:clamp(1.7rem,3.6vw,2.6rem);font-weight:700;color:var(--ink)}
+#hero .hs .l{font-size:.74rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ink3);font-weight:700}
+#hero .cue{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:var(--ink3);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:6px}
+#hero .cue .dot{width:5px;height:9px;border:1.5px solid var(--ink3);border-radius:8px;position:relative}
+#hero .cue .dot::after{content:"";position:absolute;left:50%;top:2px;width:2px;height:2px;background:var(--ink3);border-radius:50%;transform:translateX(-50%);animation:cueDrop 1.6s infinite}
+@keyframes cueDrop{60%{transform:translate(-50%,4px);opacity:0}100%{transform:translate(-50%,0);opacity:0}}
+
+/* ============ SECTIONS ============ */
+section.block{padding:clamp(56px,9vw,110px) 0}
+section.block.tight{padding-top:clamp(30px,5vw,60px)}
+.sec-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:8px}
+.sec-head .rule{flex:1;height:1px;background:var(--line);min-width:60px}
+.lede{color:var(--ink2);font-size:1.05rem;max-width:62ch}
+
+/* ============ MAP ============ */
+#mapwrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.9fr);gap:18px;align-items:stretch}
+@media (max-width:880px){#mapwrap{grid-template-columns:1fr}}
+#mapPane{position:relative;background:var(--map-water);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);min-height:440px}
+#niMap{width:100%;height:100%;min-height:480px;z-index:1}
+#niMap,.minimap{background:var(--surface2)}
+.minimap{height:340px;border-radius:10px;z-index:1}
+.pinicon{width:18px;height:18px;border-radius:50%;background:#C2451E;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.45)}
+.pinicon.sel{background:#24513F;transform:scale(1.2)}
+.leaflet-container{font-family:var(--body)}
+.hikephoto{margin:18px 0 4px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--surface)}
+.hikephoto img{display:block;width:100%;max-height:420px;object-fit:cover}
+.hikephoto figcaption{font-size:.74rem;color:var(--ink3);padding:8px 14px}
+#hero .hero-photo{position:absolute;inset:0;z-index:-4}
+#hero .hero-photo img{width:100%;height:100%;object-fit:cover}
+#hero .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--paper) 55%,transparent),color-mix(in srgb,var(--paper) 88%,transparent) 70%,var(--paper))}
+#hero .herocredit{position:absolute;bottom:6px;right:10px;font-size:.66rem;color:var(--ink3);z-index:1}
+.map-ctrl{position:absolute;display:flex;gap:6px;z-index:5}
+.map-ctrl.tl{top:10px;left:10px;flex-wrap:wrap;max-width:75%}
+.map-ctrl.tr{top:10px;right:10px;flex-direction:column}
+.mbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;min-width:34px;height:34px;cursor:pointer;font-weight:700;font-size:1rem;box-shadow:var(--shadow)}
+.mbtn.small{font-size:.74rem;font-weight:700;padding:0 10px;height:30px}
+.mbtn[aria-pressed="true"]{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+#mapTip{position:absolute;pointer-events:none;z-index:6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.8rem;box-shadow:var(--shadow);max-width:230px;display:none;line-height:1.4}
+#mapTip b{font-family:var(--display);font-size:.95rem;display:block}
+#mapTip .t2{color:var(--ink2)}
+#mapNote{font-size:.74rem;color:var(--ink3);margin-top:8px;max-width:70ch}
+#mapSide{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-height:300px}
+#mapSide .placeholder{color:var(--ink3);font-size:.9rem;margin:auto 0;text-align:center;padding:20px}
+#mapSide h3{margin-bottom:2px}
+#mapSide .statrow{display:flex;flex-wrap:wrap;gap:8px}
+#mapSide .go{margin-top:auto;display:inline-block;background:var(--forest);color:#fff;border:none;padding:11px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.92rem;text-align:center;text-decoration:none}
+:root[data-theme="dark"] #mapSide .go,html:not([data-theme="light"]) #mapSide .go{color:var(--paper)}
+#mapSide .alt-mini{font-size:.82rem;color:var(--ink2)}
+.map-label{font-size:10px;fill:var(--ink3);font-family:var(--body);pointer-events:none}
+.town-dot{fill:var(--ink3)}
+.hike-pin{cursor:pointer}
+.hike-pin circle.core{fill:var(--volcanic);stroke:var(--paper);stroke-width:1.6;transition:r .15s}
+.hike-pin.dim{opacity:.25}
+.hike-pin.sel circle.core{fill:var(--forest)}
+.hike-pin circle.pulse{fill:none;stroke:var(--volcanic);stroke-width:1;opacity:.7;animation:pinPulse 2.4s infinite}
+.hike-pin.sel circle.pulse{stroke:var(--forest)}
+@keyframes pinPulse{0%{r:6;opacity:.55}70%{r:14;opacity:0}100%{r:14;opacity:0}}
+@media (prefers-reduced-motion:reduce){.hike-pin circle.pulse{animation:none;opacity:0}}
+.drive-route{fill:none;stroke:var(--ocean);stroke-width:1.6;stroke-dasharray:4 4;opacity:0;transition:opacity .3s}
+.drive-route.show{opacity:.85}
+
+/* chips & filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 6px;align-items:center}
+.filters .flabel{font-size:.72rem;text-transform:uppercase;letter-spacing:.13em;color:var(--ink3);font-weight:700;margin-right:2px;flex:none}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink2);font-size:.8rem;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--forest);border-color:var(--forest);color:var(--paper)}
+.chip:hover{border-color:var(--forest)}
+.fgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;border-radius:12px;background:var(--surface2)}
+
+/* difficulty + status badges */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:99px;letter-spacing:.02em}
+.badge svg{flex:none}
+.b-easy{background:var(--chip-easy);color:var(--good)}
+.b-mod{background:var(--chip-mod);color:var(--ocean)}
+.b-adv{background:var(--chip-adv);color:var(--warn)}
+.b-exp{background:var(--chip-exp);color:var(--alert)}
+.b-open{background:var(--chip-easy);color:var(--good)}
+.b-part{background:var(--chip-adv);color:var(--warn)}
+.b-closed{background:var(--chip-exp);color:var(--alert)}
+
+/* ============ CARDS ============ */
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px;margin-top:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .25s ease,box-shadow .25s ease;cursor:pointer}
+.card:hover{transform:translateY(-4px)}
+.card:focus-visible{outline:2.5px solid var(--ocean);outline-offset:2px}
+.card .art{height:120px;position:relative;overflow:hidden}
+.card .art svg{width:100%;height:100%;display:block}
+.card .art .rname{position:absolute;left:12px;bottom:8px;font-family:var(--display);font-weight:700;font-size:1.12rem;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:9px;flex:1}
+.card .meta{display:flex;gap:6px;flex-wrap:wrap}
+.card .desc{font-size:.85rem;color:var(--ink2);margin:0}
+.card .nums{display:flex;gap:14px;margin-top:auto;border-top:1px dashed var(--line);padding-top:10px}
+.card .nums .n{font-family:var(--display);font-weight:700;font-size:1.02rem}
+.card .nums .l{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);font-weight:700}
+.card.hidden{display:none}
+#cardEmpty{display:none;color:var(--ink3);padding:30px;text-align:center;border:1.5px dashed var(--line);border-radius:var(--radius);margin-top:20px}
+
+/* ============ COMPARE ============ */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+table.cmp{border-collapse:collapse;min-width:980px;width:100%;font-size:.84rem}
+table.cmp th,table.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+table.cmp thead th{position:sticky;top:0;background:var(--surface2);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);z-index:2}
+table.cmp tbody th{font-family:var(--display);font-size:.95rem;white-space:nowrap;background:var(--surface);position:sticky;left:0;z-index:1;border-right:1px solid var(--line-soft)}
+table.cmp tbody tr:hover td{background:var(--surface2)}
+.cmp .bar{height:7px;border-radius:5px;background:var(--surface2);position:relative;min-width:70px;margin-top:5px}
+.cmp .bar i{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--forest)}
+
+/* ============ HIKE SECTIONS ============ */
+.hike{border-top:1px solid var(--line);position:relative}
+.hike .region-water{position:absolute;top:12px;right:0;font-family:var(--display);font-style:italic;font-size:clamp(3rem,10vw,7rem);color:var(--ink);opacity:.05;pointer-events:none;white-space:nowrap;transform:translateY(var(--wy,0))}
+.hike .idx{font-family:var(--mono);color:var(--volcanic);font-size:.85rem;font-weight:700}
+.hike h2.tname{font-size:clamp(2rem,5.4vw,3.6rem);letter-spacing:-.015em;margin:.15em 0 .2em}
+.hike h2.tname .hw{display:inline-block;opacity:0;transform:translateY(.4em);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i)*.06s)}
+.hike.seen h2.tname .hw{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.hike h2.tname .hw{opacity:1;transform:none}}
+.hike .tagline{font-family:var(--display);font-style:italic;font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--ink2);max-width:46ch}
+.alertbar{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:12px 15px;font-size:.88rem;margin:16px 0;border:1px solid}
+.alertbar.warn{background:var(--chip-adv);border-color:color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink)}
+.alertbar.bad{background:var(--chip-exp);border-color:color-mix(in srgb,var(--alert) 45%,transparent);color:var(--ink)}
+.alertbar b{color:inherit}
+.alertbar .ic{flex:none;margin-top:2px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:22px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat .n{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,2.6vw,1.9rem);color:var(--ink)}
+.stat .n small{font-size:.6em;color:var(--ink3);font-family:var(--body);font-weight:600}
+.stat .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);font-weight:700;margin-top:2px}
+.duo{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start;margin:14px 0 8px}
+@media (max-width:880px){.duo{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.panel h4{font-size:1.02rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel .cap{font-size:.72rem;color:var(--ink3);margin-top:8px;line-height:1.45}
+.routemap svg,.elev svg{width:100%;height:auto;display:block}
+.routemap .rm-track{fill:none;stroke:var(--volcanic);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.routemap .rm-alt{fill:none;stroke:var(--ocean);stroke-width:1.7;stroke-dasharray:5 4}
+.routemap .rm-closed{fill:none;stroke:var(--alert);stroke-width:2.2;stroke-dasharray:2.5 3.5}
+.routemap text{font-family:var(--body);font-size:6.4px;fill:var(--ink2)}
+.routemap text.big{font-size:7.2px;fill:var(--ink);font-weight:600}
+.routemap .water{fill:var(--map-water)}
+.routemap .land{fill:var(--map-land)}
+.routemap .contour{fill:none;stroke:var(--map-ridge);stroke-width:.6;opacity:.8}
+.rm-cursor{fill:var(--forest);stroke:var(--paper);stroke-width:1.4;opacity:0;transition:opacity .15s}
+.rm-cursor.on{opacity:1}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:10px;font-size:.72rem;color:var(--ink2)}
+.legend .li{display:inline-flex;align-items:center;gap:6px}
+.legend .sw{width:16px;height:0;border-top:2.5px solid var(--volcanic);border-radius:2px}
+.legend .sw.alt{border-top:2px dashed var(--ocean)}
+.legend .sw.closed{border-top:2.5px dashed var(--alert)}
+
+/* elevation */
+.elev{position:relative}
+.elev .ex-line{stroke:var(--line);stroke-width:1}
+.elev .ex-grid{stroke:var(--line-soft);stroke-width:.7}
+.elev .ex-area{fill:color-mix(in srgb,var(--forest) 22%,transparent)}
+.elev .ex-path{fill:none;stroke:var(--forest);stroke-width:2}
+.elev text{font-family:var(--body);font-size:7px;fill:var(--ink3)}
+.elev .ex-cross{stroke:var(--volcanic);stroke-width:1;opacity:0}
+.elev .ex-dot{fill:var(--volcanic);opacity:0}
+.elev .ex-hit{fill:transparent;cursor:crosshair}
+#elevTipT{position:absolute;top:6px;left:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:.74rem;display:none;pointer-events:none;box-shadow:var(--shadow)}
+
+/* expandables */
+details.x{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:8px 0;overflow:hidden}
+details.x summary{cursor:pointer;list-style:none;padding:13px 16px;font-weight:700;font-size:.93rem;display:flex;align-items:center;gap:10px;color:var(--ink)}
+details.x summary::-webkit-details-marker{display:none}
+details.x summary .chev{margin-left:auto;transition:transform .25s;color:var(--ink3);flex:none}
+details.x[open] summary .chev{transform:rotate(180deg)}
+details.x .dx{padding:2px 16px 16px;font-size:.9rem;color:var(--ink2)}
+details.x .dx ul{margin:.3em 0;padding-left:1.2em}
+details.x .dx li{margin:.25em 0}
+details.x .dx table{width:100%;border-collapse:collapse;font-size:.84rem}
+details.x .dx table td,details.x .dx table th{padding:7px 8px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+
+/* route options / alternatives */
+.optlist{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.opt{border:1px solid var(--line);border-left:4px solid var(--forest);border-radius:10px;background:var(--surface);padding:13px 16px}
+.opt.rec{border-left-color:var(--tussock-bright)}
+.opt .otag{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--tussock)}
+.opt h5{margin:2px 0 4px;font-family:var(--display);font-size:1.05rem}
+.opt .ometa{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:.78rem;color:var(--ink2);margin:6px 0}
+.opt .ometa b{color:var(--ink)}
+.opt p{font-size:.86rem;color:var(--ink2);margin:.3em 0}
+.opt .why{font-size:.85rem}
+.opt .src{font-size:.76rem}
+
+/* gear */
+.gearcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}
+.gear{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.gear h5{margin:0 0 7px;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--forest)}
+.gear ul{margin:0;padding-left:1.15em;font-size:.84rem;color:var(--ink2)}
+.gear li{margin:.22em 0}
+.gwarn{font-size:.84rem;background:var(--chip-adv);border-radius:10px;padding:10px 13px;margin-top:10px;color:var(--ink)}
+
+/* pull quote */
+.pull{border-left:3px solid var(--tussock-bright);padding:6px 0 6px 20px;margin:26px 0;font-family:var(--display);font-style:italic;font-size:clamp(1.15rem,2.4vw,1.5rem);color:var(--ink2);max-width:44ch}
+
+/* sources */
+.sources{font-size:.8rem;color:var(--ink2);border-top:1px dashed var(--line);margin-top:26px;padding-top:14px}
+.sources .lc{display:inline-block;background:var(--surface2);border-radius:99px;padding:2px 11px;font-size:.72rem;font-weight:700;color:var(--ink2);margin-bottom:8px}
+.sources ul{margin:.3em 0 0;padding-left:1.2em}
+.sources li{margin:.2em 0}
+
+/* ============ BUDGET ============ */
+#budget .panel{max-width:880px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:14px 0}
+.bfield label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:5px}
+.bfield select,.bfield input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:.92rem;font-family:var(--body)}
+#budgetOut{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
+#budgetOut .big{font-family:var(--display);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:var(--forest)}
+#budgetOut table{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:10px}
+#budgetOut td{padding:6px 4px;border-bottom:1px solid var(--line-soft)}
+#budgetOut td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.bdisc{font-size:.74rem;color:var(--ink3);margin-top:10px}
+
+/* ============ SAFETY ============ */
+#safety{background:var(--surface2)}
+.safegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
+.safecard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.safecard h4{display:flex;gap:9px;align-items:center;font-size:1rem}
+.safecard p,.safecard ul{font-size:.87rem;color:var(--ink2)}
+.safecard ul{padding-left:1.2em;margin:.3em 0}
+.emg{background:var(--chip-exp);border:1px solid color-mix(in srgb,var(--alert) 40%,transparent);border-radius:12px;padding:16px 18px;margin-top:16px}
+.emg b{font-size:1.05rem}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:40px 0 60px;color:var(--ink3);font-size:.82rem}
+footer .cols{display:flex;gap:40px;flex-wrap:wrap}
+.backtop{position:fixed;bottom:18px;right:18px;z-index:55;background:var(--forest);color:var(--paper);border:none;border-radius:99px;width:44px;height:44px;font-size:1.1rem;cursor:pointer;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .3s}
+.backtop.show{opacity:1;pointer-events:auto}
+@media (max-width:640px){
+  body{font-size:15.5px}
+  #topnav .brand span.long{display:none}
+  .statgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+
+<!-- ================= NAV ================= -->
+<header id="topnav">
+  <div class="bar">
+    <a class="brand" href="#hero">Te Ika-a-Māui <em>/ North Island Tracks</em></a>
+    <nav id="navlinks" aria-label="Main sections">
+      <a href="#map" data-nav>Map</a>
+      <a href="#choose" data-nav>Choose a hike</a>
+      <a href="#compare" data-nav>Compare</a>
+      <a href="#hikes" data-nav>The tracks</a>
+      <a href="#budget" data-nav>Budget</a>
+      <a href="#safety" data-nav>Safety</a>
+    </nav>
+    <button id="themeBtn" title="Toggle light/dark theme" aria-label="Toggle light or dark theme">◐</button>
+  </div>
+  <div id="progress" role="presentation"></div>
+</header>
+<nav id="hikenav" aria-label="Hike quick navigation"><div class="rail" id="hikenavRail"></div></nav>
+
+<!-- ================= HERO ================= -->
+<section id="hero" aria-label="Introduction">
+  <div class="hero-photo" aria-hidden="true"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Tongariro_Emerald_And_Blue_Lakes_Panorama_%2852344397945%29.jpg/1920px-Tongariro_Emerald_And_Blue_Lakes_Panorama_%2852344397945%29.jpg" alt=""></div>
+  <div class="sky" style="opacity:.35"></div>
+  <span class="herocredit">Emerald &amp; Blue Lakes, Tongariro — photo: Geoff McKay, <a href="https://commons.wikimedia.org/wiki/File:Tongariro_Emerald_And_Blue_Lakes_Panorama_(52344397945).jpg" target="_blank" rel="noopener">CC BY 2.0</a></span>
+  <div class="ridges" aria-hidden="true">
+    <svg viewBox="0 0 1200 380" preserveAspectRatio="none">
+      <path d="M0,300 L60,270 140,290 220,230 300,265 380,210 470,250 560,170 640,225 720,150 820,215 900,120 990,190 1080,140 1200,200 L1200,380 0,380 Z" fill="var(--map-ridge)" opacity=".45"/>
+      <path d="M0,330 L80,300 170,320 260,275 350,305 450,255 540,295 640,235 740,285 850,220 950,270 1060,225 1200,265 L1200,380 0,380 Z" fill="var(--forest-soft)" opacity=".35"/>
+      <path d="M0,355 L100,335 200,350 310,318 420,342 540,308 660,335 780,300 900,330 1030,295 1200,320 L1200,380 0,380 Z" fill="var(--forest)" opacity=".55"/>
+    </svg>
+  </div>
+  <div class="inner container">
+    <div class="kicker rv2 on"><span class="rule"></span><span class="eyebrow">Aotearoa New Zealand · A field guide in ten walks</span></div>
+    <h1 id="heroTitle" aria-label="Ten tracks across the North Island"></h1>
+    <p class="sub">From a rock-climbing finish above a drowned-valley harbour in Northland to a wind-scoured alpine hut in the Tararua Range — ten researched, source-checked walks and tramps, with maps, gear lists, budgets and the honest hazards. Information last checked <strong>16 July 2026</strong>.</p>
+    <div class="heroStats" role="list">
+      <div class="hs" role="listitem"><div class="n num" data-count="10">0</div><div class="l">Tracks</div></div>
+      <div class="hs" role="listitem"><div class="n num" data-count="107" data-suffix=" km">0</div><div class="l">Combined distance</div></div>
+      <div class="hs" role="listitem"><div class="n num" data-count="1886" data-suffix=" m">0</div><div class="l">Highest point (Red Crater)</div></div>
+      <div class="hs" role="listitem"><div class="n num" data-count="7">0</div><div class="l">Regions</div></div>
+    </div>
+  </div>
+  <div class="cue" aria-hidden="true"><div class="dot"></div>Scroll</div>
+</section>
+<!-- ================= MAP ================= -->
+<section id="map" class="block">
+  <div class="container">
+    <div class="sec-head"><span class="eyebrow rv">01 — <b>Orient</b></span><span class="rule"></span></div>
+    <h2 class="rv">One island, ten pins</h2>
+    <p class="lede rv">Pan, zoom and tap the pins on a real topographic map — or switch to satellite. Orange lines are the official track geometries. Filter by region, difficulty, length or overnight need; every pin opens the full field guide below. The dashed blue line on selection shows the <em>approximate</em> line (not the road route) from the nearest large town.</p>
+
+    <div class="filters" id="mapFilters" aria-label="Map filters">
+      <span class="flabel">Filter</span>
+      <div class="fgroup" data-fgroup="region" role="group" aria-label="Region"></div>
+      <div class="fgroup" data-fgroup="difficulty" role="group" aria-label="Difficulty"></div>
+      <div class="fgroup" data-fgroup="duration" role="group" aria-label="Duration"></div>
+      <div class="fgroup" data-fgroup="type" role="group" aria-label="Track type"></div>
+      <button class="chip" id="clearFilters" type="button">✕ Clear</button>
+    </div>
+
+    <div id="mapwrap" class="rv2">
+      <div id="mapPane">
+        <div id="niMap" role="application" aria-label="Interactive map of the North Island with hike markers. The layer control switches between topographic, satellite and street views. A text alternative is in the comparison table."></div>
+      </div>
+      <aside id="mapSide" aria-live="polite">
+        <div class="placeholder">Select a pin on the map<br>— or tap a card below —<br>to see the hike summary here.</div>
+      </aside>
+    </div>
+    <p id="mapNote">Real maps: topographic (OpenTopoMap), satellite (Esri World Imagery) and street (OpenStreetMap) layers. Orange track lines are official geometry — DOC Tracks open data (CC-BY 4.0) where available, OpenStreetMap (ODbL) for the Escarpment, Mercer Bay and Deliverance Cove tracks. Still <strong>not a navigation device</strong> — carry the paper/offline map named in each guide, e.g. <a href="https://www.topomap.co.nz" target="_blank" rel="noopener">NZ Topo Map</a> or the official <a href="https://www.doc.govt.nz" target="_blank" rel="noopener">DOC track pages</a>. A text list of all hikes with the same details is in <a href="#compare">the comparison table</a>.</p>
+  </div>
+</section>
+
+<!-- ================= CHOOSE ================= -->
+<section id="choose" class="block tight">
+  <div class="container">
+    <div class="sec-head"><span class="eyebrow rv">02 — <b>Choose</b></span><span class="rule"></span></div>
+    <h2 class="rv">Choose your next hike</h2>
+    <p class="lede rv">The same filters apply here. Cards show core stats and current status; select one to jump to its full guide.</p>
+    <div id="cards"></div>
+    <div id="cardEmpty">No tracks match those filters — try clearing one.</div>
+
+    <h3 style="margin-top:46px" class="rv">If you only do three…</h3>
+    <p class="rv" style="font-size:.95rem;color:var(--ink2)">
+      <strong>Best single day:</strong> the Tongariro Alpine Crossing, if the forecast is kind and you’re fit.
+      <strong>Best overnight for first-timers:</strong> Pouākai Hut &amp; the tarns — huge reward for a steady boardwalk climb.
+      <strong>Best short wow-per-minute:</strong> Mercer Bay Loop at golden hour.
+    </p>
+  </div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section id="compare" class="block">
+  <div class="container">
+    <div class="sec-head"><span class="eyebrow rv">03 — <b>Compare</b></span><span class="rule"></span></div>
+    <h2 class="rv">Every track, side by side</h2>
+    <p class="lede rv">Swipe sideways on a phone. Distance bars are scaled to the longest track (19.4&nbsp;km). Costs are indicative per adult and dated in each hike’s guide.</p>
+    <div class="tablewrap rv2" tabindex="0" aria-label="Hike comparison table, scrolls horizontally">
+      <table class="cmp" id="cmpTable"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HIKES (rendered by JS) ================= -->
+<div id="hikes"></div>
+
+<!-- ================= BUDGET ================= -->
+<section id="budget" class="block">
+  <div class="container">
+    <div class="sec-head"><span class="eyebrow rv">05 — <b>Plan</b></span><span class="rule"></span></div>
+    <h2 class="rv">Budget planner</h2>
+    <p class="lede rv">A rough trip-cost estimator in New Zealand dollars. Defaults come from prices checked 16 July 2026 (DOC hut categories) and typical operator ranges — <strong>estimates, not quotes</strong>.</p>
+    <div class="panel rv2">
+      <div class="bgrid">
+        <div class="bfield"><label for="bHike">Hike</label><select id="bHike"></select></div>
+        <div class="bfield"><label for="bMode">Trip style</label>
+          <select id="bMode">
+            <option value="day">Day trip</option>
+            <option value="hut">Hut overnight</option>
+            <option value="camp">Tent camping</option>
+          </select></div>
+        <div class="bfield"><label for="bStay">Town accommodation</label>
+          <select id="bStay">
+            <option value="none">None (drive same day)</option>
+            <option value="budget">Budget (~$45/pp holiday park or hostel)</option>
+            <option value="mid">Mid-range (~$120/pp motel)</option>
+          </select></div>
+        <div class="bfield"><label for="bPeople">People</label><input id="bPeople" type="number" min="1" max="12" value="2"></div>
+        <div class="bfield"><label for="bNights">Nights away</label><input id="bNights" type="number" min="0" max="7" value="1"></div>
+        <div class="bfield"><label for="bKm">Return drive (km)</label><input id="bKm" type="number" min="0" max="2000" value="300"></div>
+        <div class="bfield"><label for="bShuttle">Shuttle / transport</label>
+          <select id="bShuttle"><option value="0">Not needed</option><option value="1">Yes (typical operator fare)</option></select></div>
+        <div class="bfield"><label for="bHire">Equipment hire</label>
+          <select id="bHire"><option value="0">None</option><option value="basic">Boots/pack (~$30/day pp)</option><option value="alpine">Alpine kit incl. ice axe/crampons (~$50/day pp)</option></select></div>
+      </div>
+      <div id="budgetOut" aria-live="polite"></div>
+      <p class="bdisc">Fuel assumed at ~9&nbsp;L/100&nbsp;km and $2.75/L (NZ average, checked 16 Jul 2026 — varies by region and vehicle). Food allowance $25/pp per day-hike day, $40/pp per overnight day. Hut and campsite fees use DOC categories current from 1 July 2026; verify the exact hut on <a href="https://bookings.doc.govt.nz" target="_blank" rel="noopener">bookings.doc.govt.nz</a>. Shuttle fares vary by operator and season. Nothing here is a guaranteed price.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SAFETY ================= -->
+<section id="safety" class="block">
+  <div class="container">
+    <div class="sec-head"><span class="eyebrow rv">06 — <b>Go safely</b></span><span class="rule"></span></div>
+    <h2 class="rv">Before every walk</h2>
+    <p class="lede rv">Based on the NZ Mountain Safety Council’s Land Safety Code and DOC guidance. This website is a planning aid — it does not replace official track information, current forecasts, or your own preparation and judgement.</p>
+    <div class="safegrid">
+      <div class="safecard rv"><h4>⛅ 1 · Choose the right trip</h4><p>Match the track to the least experienced person in your group. Winter (roughly May–October) turns Tongariro, Tama Lakes, Kime and Powell into alpine trips needing ice axe, crampons and the skills to use them.</p></div>
+      <div class="safecard rv"><h4>🌧 2 · Understand the weather</h4><p>Check the <a href="https://www.metservice.com" target="_blank" rel="noopener">MetService</a> mountain/national-park forecast the day before <em>and</em> the morning of your walk. NZ alpine weather changes in minutes; if a severe watch or warning is issued, change your plan.</p></div>
+      <div class="safecard rv"><h4>🎒 3 · Pack warm clothes + extra food</h4><p>Waterproof shell, warm insulating layers (no cotton), hat and gloves, headtorch, first aid, survival bag, and a day’s spare food — on every track graded moderate or harder in this guide.</p></div>
+      <div class="safecard rv"><h4>📍 4 · Share your plans + take ways to get help</h4><p>Leave trip intentions with a trusted contact (use <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> or AdventureSmart). Carry a charged phone <em>and</em> a distress beacon (PLB) where coverage is patchy — most of these tracks have dead zones.</p></div>
+      <div class="safecard rv"><h4>🥾 5 · Take care of yourself and your group</h4><p>Eat, drink, and check each other. Set a turnaround time and honour it — summits and tarns will still be there next weekend. Rivers: if you can’t see the bottom or it’s above your knees, don’t cross; wait or turn back.</p></div>
+      <div class="safecard rv"><h4>🔥 Alerts, fires &amp; closures</h4><ul><li>Check <a href="https://www.doc.govt.nz/parks-and-recreation/know-before-you-go/alerts/" target="_blank" rel="noopener">DOC alerts</a> and <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> the week you travel.</li><li>Check <a href="https://www.checkitsalright.nz" target="_blank" rel="noopener">fire season status</a> before any camp stove use outdoors.</li><li>Respect rāhui and cultural restrictions — currently relevant at Tongariro.</li></ul></div>
+    </div>
+    <div class="emg rv">
+      <b>Emergency: dial 111 and ask for Police</b> — they coordinate land search and rescue in New Zealand. No signal? Activate your PLB / satellite messenger SOS. Text 111 works only if pre-registered. For volcanic activity levels see <a href="https://www.geonet.org.nz" target="_blank" rel="noopener">GeoNet</a>.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container cols">
+    <div style="max-width:46ch">
+      <b style="color:var(--ink)">Te Ika-a-Māui / North Island Tracks</b><br>
+      An independent, non-commercial hiking guide compiled from official sources. All facts last checked <b>16 July 2026</b>; tracks, prices and alerts change — always confirm with the linked source before you travel. Track names and te reo Māori place names follow DOC usage.
+    </div>
+    <div>
+      <b style="color:var(--ink)">Official sources used throughout</b><br>
+      <a href="https://www.doc.govt.nz" target="_blank" rel="noopener">Department of Conservation</a><br>
+      <a href="https://www.metservice.com" target="_blank" rel="noopener">MetService</a> · <a href="https://www.mountainsafety.org.nz" target="_blank" rel="noopener">NZ Mountain Safety Council</a><br>
+      <a href="https://www.topomap.co.nz" target="_blank" rel="noopener">NZ Topo Map</a> · <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a><br>
+      <a href="https://www.aucklandcouncil.govt.nz" target="_blank" rel="noopener">Auckland Council</a> · <a href="https://www.herengaanuku.govt.nz" target="_blank" rel="noopener">Herenga ā Nuku</a>
+    </div>
+    <div style="max-width:38ch">
+      <b style="color:var(--ink)">About the visuals</b><br>
+      Maps: © OpenStreetMap contributors; topo style © OpenTopoMap (CC-BY-SA); satellite tiles © Esri &amp; partners. Track lines: DOC Tracks open data (CC-BY 4.0) and OpenStreetMap (ODbL). Elevation profiles are approximate illustrations. Photographs are from Wikimedia Commons under the licence credited beneath each image — every photo names its location and photographer.
+    </div>
+  </div>
+</footer>
+<button class="backtop" id="backtop" aria-label="Back to top">↑</button>
+<script>
+"use strict";
+/* ==================== DATA ==================== */
+const CHECKED = "16 Jul 2026";
+const DIFF = {
+  easy:{label:"Easy walking", cls:"b-easy"},
+  mod:{label:"Moderate", cls:"b-mod"},
+  adv:{label:"Advanced tramping", cls:"b-adv"},
+  alp:{label:"Advanced · alpine", cls:"b-exp"}
+};
+const REGIONS = {
+  northland:"Northland", auckland:"Auckland", waikatobop:"Waikato / Bay of Plenty",
+  centralplateau:"Central Plateau", taranaki:"Taranaki", kapiti:"Kāpiti / Wellington", wairarapa:"Wairarapa"
+};
+
+const HIKES = [
+/* ---------- 1 TONGARIRO ---------- */
+{
+id:"tongariro", num:"01", name:"Tongariro Alpine Crossing", short:"Tongariro Crossing",
+region:"centralplateau", lat:-39.132, lon:175.652,
+town:"National Park Village / Tūrangi", townPin:{name:"National Park Village", lat:-39.175, lon:175.395},
+tagline:"New Zealand’s most famous day walk — a one-way traverse over live volcanic terrain, past Red Crater and the Emerald Lakes.",
+type:"Point-to-point", overnight:false, durationH:8, distKm:19.4,
+stats:{dist:"19.4 km", time:"7–9 hr", gain:"~800 m", high:"1,886 m"},
+status:{level:"part", label:"Open — special conditions",
+ text:"Open, with conditions. Recent fires burned areas near the Mangatepōpō end — expect blackened landscape, and respect the 10-year restorative rāhui placed by Ngāti Hikairo ki Tongariro over the affected area. In winter (roughly May–October) DOC manages the crossing as an alpine route: ice axe, crampons and alpine skills or a guide are required. Free DOC booking recommended for all walkers year-round."},
+essentials:{
+ trailhead:"Start: Mangatepōpō Road end (off SH47). Finish: Ketetahi Road (off SH46). Parking at both ends is very limited and time-restricted — nearly everyone uses a shuttle.",
+ surface:"Boardwalk and formed track early, then steep, loose, exposed volcanic terrain; poled route over Red Crater with a loose scree descent to the Emerald Lakes.",
+ seasons:"November–April for most walkers. May–October is a serious alpine undertaking — many go guided.",
+ exposure:"Fully exposed alpine crossing above 1,100 m for hours; severe weather possible any month, snow can fall in summer.",
+ fitness:"High. Long day with a sustained 600+ m climb (Devil’s Staircase) and a knee-testing 1,100 m descent.",
+ kids:"Fit, experienced older kids in perfect summer weather only; not a family walk.",
+ dogs:"No dogs — national park.",
+ mobile:"Patchy but reasonable on high points; dead spots in valleys. Carry a PLB anyway.",
+ water:"No reliable safe water on track (volcanic minerals); carry 1.5–2 L+ per person.",
+ emergency:"Toilets every 1–2 hr. Ketetahi Shelter is an emergency shelter only. Turning back from South Crater is the main bail-out before Red Crater."},
+like:[
+ "The crossing packs an absurd amount into one day: steaming vents, the black lava flows of Ngāuruhoe’s skirts, the climb up the Devil’s Staircase, the moonscape of South Crater, then the sudden shock of colour — Red Crater’s oxidised gash and the mineral-turquoise Emerald Lakes (Ngā Rotopounamu) below. The long northern descent unwinds through tussock and regenerating bush with Lake Taupō filling the horizon.",
+ "It is genuinely hard: the Red Crater ridge is loose and exposed, the scree descent to the lakes rattles ankles, and the weather window makes or breaks the day. This is also a sacred landscape — the summits are tapu to Ngāti Tūwharetoa and DOC and iwi ask walkers not to climb Ngāuruhoe or linger on summit areas, and not to touch the water of the lakes."],
+features:{crowds:"Very busy in summer — 2,000+ walkers on fine days. Start before 8 am for quiet; midweek beats weekends.",
+ photos:"Red Crater rim looking over the Emerald Lakes (mid-morning light); South Crater with Ngāuruhoe behind; Blue Lake reflections.",
+ sun:"A dawn start from Mangatepōpō puts sunrise on Ngāuruhoe; winter days are short — be off the tops by mid-afternoon."},
+options:[
+ {tag:"Recommended · most popular", name:"Mangatepōpō → Ketetahi (south to north)", dir:"One way, northbound", meta:{dist:"19.4 km",time:"7–9 hr",elev:"+800 m / −1,160 m",diff:"Advanced"},
+  why:"The standard direction: 350 m less climbing, the hard ascent done early, and shuttle timetables are built around it. Best for almost everyone.", needs:"Shuttle booking; free DOC walker booking recommended."},
+ {tag:"Shortest · easiest taste", name:"Mangatepōpō to Soda Springs return", dir:"Return", meta:{dist:"~8 km return",time:"2.5–3 hr",elev:"+150 m",diff:"Easy–moderate"},
+  why:"Flat valley boardwalk to the springs at the base of the Devil’s Staircase. A genuine option when cloud sits on the tops.", needs:"No shuttle — return to your car."},
+ {tag:"Bad-weather / turnaround", name:"South Crater turnaround", dir:"Return from ~9 km", meta:{dist:"~13 km return",time:"5–6 hr",elev:"+600 m",diff:"Moderate–advanced"},
+  why:"If wind or visibility deteriorates, South Crater is the sensible last turnaround before the exposed Red Crater ridge.", needs:"Discipline. The ridge is where most incidents happen."},
+ {tag:"Advanced · reverse", name:"Ketetahi → Mangatepōpō (northbound reversed)", dir:"One way, southbound", meta:{dist:"19.4 km",time:"8–10 hr",elev:"+1,160 m",diff:"Advanced"},
+  why:"Quieter and photogenic light on the lakes, but a much bigger climb; only worth it for strong parties chasing solitude.", needs:"Shuttle that supports the reverse direction."},
+ {tag:"Overnight", name:"Tongariro Northern Circuit (Great Walk)", dir:"Loop, 3–4 days", meta:{dist:"~45 km",time:"3–4 days",elev:"Alpine",diff:"Great Walk (advanced in winter)"},
+  why:"Sleeps the same landscape — includes the crossing’s highlights plus Ōturere’s dune-like lava field. DOC opened a new hut and updated the route in May 2026 — check the current circuit description when booking.", needs:"Great Walk hut bookings (essential in season)."}],
+itinerary:{title:"Suggested day (summer, northbound) — times approximate",
+ rows:[["05:45","Shuttle from National Park Village / Tūrangi"],["06:30","Mangatepōpō car park — start"],["07:30","Soda Springs junction; last toilets before the climb"],["08:30","Top of Devil’s Staircase, cross South Crater"],["09:30","Red Crater rim (1,886 m) — photos, then careful scree descent"],["10:15","Emerald Lakes — early lunch out of the wind"],["11:00","Blue Lake (Te Wai-whakaata-o-te-Rangihīroa) — do not touch the water"],["12:30","Ketetahi Shelter — knees-brace descent begins"],["14:30","Ketetahi Road end — shuttle pickup"],["Turnaround","Not at Red Crater by ~13:00 (summer)? Turn back the way you came."]]},
+gear:{groups:[
+ ["Essential day kit",["Waterproof shell + overtrousers","Fleece/puffer layers (no cotton)","Hat, gloves, sunhat, sunglasses","1.5–2 L water pp","Lunch + emergency food","First aid, survival bag, headtorch","Sturdy boots or grippy trail shoes"]],
+ ["Alpine season (May–Oct)",["Ice axe & crampons (and skills)","Insulated jacket","Goggles/balaclava in wind","Avalanche awareness — check forecast","Consider a guided trip"]],
+ ["Navigation & emergency",["Phone + offline map (NZ Topo50 BJ34/BJ35)","PLB or satellite messenger","Booking confirmation / shuttle time"]],
+ ["Optional photography",["Wide zoom for craters","Polariser for the lakes","Spare battery — cold drains fast"]]],
+ warn:"Winter crossing without ice axe, crampons and alpine experience has repeatedly proven fatal. If in doubt, book a guide (three DOC-approved winter guiding operators run daily trips)."},
+accom:[
+ ["National Park Village (15 min drive to Mangatepōpō turnoff)","Backpackers, lodges, hotels; most shuttle pickups start here.","Book ahead in summer & ski season"],
+ ["Whakapapa Village (in the park)","Hotel, holiday park; closest bed to the trailheads.","Book ahead"],
+ ["Tūrangi (25 min to Ketetahi end)","Motels, holiday parks; handy for northbound finish.","Usually available"],
+ ["Mangahuia Campsite (DOC, SH47)","Basic DOC campsite between the villages.","Standard DOC campsite fees — check current rate when booking"]],
+costs:[
+ ["DOC walker booking","Free","16 Jul 2026"],
+ ["Shuttle (return, from National Park/Tūrangi)","$45–$60 typical advertised range — varies by operator","16 Jul 2026 · verify with operator"],
+ ["Guided winter crossing","$260–$350 typical","16 Jul 2026 · verify with operator"],
+ ["Northern Circuit huts (Great Walk season)","Check current Great Walk rates on DOC booking site","16 Jul 2026"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Tama Lakes Track", loc:"Same park — starts Whakapapa Village (20 min drive)", meta:{dist:"17 km return",time:"5–6 hr",diff:"Moderate–advanced",kind:"Day"},
+  why:"The classic fallback when the crossing’s weather or logistics don’t work: same volcanic scenery, half the exposure, no shuttle. Featured in full below.", safety:"Still alpine above Taranaki Falls — full kit.", src:{t:"DOC — Tama Lakes Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tama-lakes-track/"}, status:"Open (check alerts)"},
+ {rank:"2 · Best shorter option", name:"Taranaki Falls Loop", loc:"Whakapapa Village", meta:{dist:"6 km loop",time:"2 hr",diff:"Easy",kind:"Day"},
+  why:"A 20 m waterfall over a 15,000-year-old lava flow; genuinely good in most weather and great with kids.", safety:"Exposed tussock section — windproof layer.", src:{t:"DOC — Taranaki Falls",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/taranaki-falls-track/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best quieter option", name:"Silica Rapids Track", loc:"Whakapapa Village", meta:{dist:"7 km loop",time:"2.5 hr",diff:"Easy",kind:"Day"},
+  why:"Cream-coloured silica terraces and beech forest; a fraction of the crossing’s foot traffic.", safety:"Slippery boardwalk when frosty.", src:{t:"DOC — Silica Rapids",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/silica-rapids-track/"}, status:"Open (check alerts)"},
+ {rank:"4 · Best overnight upgrade", name:"Tongariro Northern Circuit", loc:"Loop from Whakapapa Village", meta:{dist:"~45 km",time:"3–4 days",diff:"Great Walk",kind:"Overnight"},
+  why:"All the crossing’s drama without the day-walk crowds’ schedule; new hut and updated route opened May 2026.", safety:"Alpine weather planning; book huts.", src:{t:"DOC — Northern Circuit",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tongariro-northern-circuit/"}, status:"Open — new route section (check alerts)"}],
+sources:[
+ ["DOC — Tongariro Alpine Crossing (official track page)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tongariro-alpine-crossing/"],
+ ["DOC media — fires & rāhui context / operator suspension (Mar 2026)","https://www.doc.govt.nz/news/media-releases/2026-media-releases/"],
+ ["DOC — Northern Circuit new hut & route (May 2026)","https://www.doc.govt.nz/news/media-releases/2026-media-releases/new-hut-updated-route-for-tongariro-northern-circuit-walkers/"],
+ ["MetService — Tongariro National Park forecast","https://www.metservice.com/outdoor/parks/tongariro-national-park"],
+ ["NZ Mountain Safety Council — Tongariro Alpine Crossing safety video","https://www.mountainsafety.org.nz"],
+ ["GeoNet — volcanic alert levels","https://www.geonet.org.nz/volcano"]],
+route:{caption:"Schematic of the standard northbound crossing. Distances/positions approximate — carry Topo50 BJ34/BJ35.",
+ path:[[14,104],[34,96],[52,92],[66,84],[76,72],[88,62],[100,52],[108,44],[118,40],[128,44],[136,40],[146,34],[158,30],[172,22],[186,16]],
+ pois:[[0,"TH","Mangatepōpō car park & shuttle drop"],[2,"TOILET","Soda Springs jct — toilets"],[3,"HAZ","Devil’s Staircase (steep)"],[5,"JCT","South Crater — last turnaround"],[6,"HAZ","Red Crater ridge 1,886 m — exposed, loose"],[7,"VIEW","Emerald Lakes"],[9,"VIEW","Blue Lake — tapu, no touching"],[12,"EXIT","Ketetahi Shelter (emergency only)"],[14,"SHUT","Ketetahi Rd — shuttle pickup"]],
+ terrain:"volcano"},
+elev:[[0,1120],[1,1150],[3,1210],[4.5,1420],[5.5,1620],[6.8,1700],[7.5,1886],[8,1790],[8.6,1730],[9.6,1720],[10.6,1740],[11.6,1640],[13,1440],[14.5,1240],[16,1040],[17.5,890],[19.4,760]],
+pull:"“Bookings are recommended for all visitors using any part of the Tongariro Alpine Crossing track.” — Department of Conservation"
+},
+
+/* ---------- 2 DUKE'S NOSE ---------- */
+{
+id:"dukes-nose", num:"02", name:"Duke’s Nose (Kaiaraara Rocks)", short:"Duke’s Nose",
+region:"northland", lat:-35.055, lon:173.755,
+town:"Totara North / Kāeo (Kerikeri ~40 min)", townPin:{name:"Kerikeri", lat:-35.226, lon:173.947},
+tagline:"A muddy Northland valley walk that ends with a steel-rung scramble to a bald rock dome — 360° over fjord-like Whangaroa Harbour.",
+type:"Return (or overnight via hut)", overnight:false, durationH:6, distKm:10.5,
+stats:{dist:"~10.5 km rtn*", time:"5–6 hr rtn*", gain:"~600 m*", high:"409 m"},
+statNote:"*Distances/times approximate — DOC grades the Wairakau Stream Track for experienced trampers and does not publish a full return figure.",
+status:{level:"open", label:"Open",
+ text:"No DOC alerts found at last check. The Wairakau Stream crossings become swift and deep in rain — do not cross during or after heavy rain. The summit scramble has vertical drop-offs and no safety barriers."},
+essentials:{
+ trailhead:"Wairakau Stream Track entrance ~400 m along Campbell Road, Totara North (park well off the road on the grass verge). Alternative: boat/water-taxi from Whangaroa or Totara North to Lane Cove.",
+ surface:"Clay farmland, regenerating bush, notoriously muddy sections, two minor stream crossings; final 40–60 min is a steep scramble with a fixed steel pole and rungs on near-vertical rock.",
+ seasons:"Year-round, but the clay is treacherous after rain — pick a dry spell. Summer is best.",
+ exposure:"Bush-sheltered until the rock; the dome itself is fully exposed with sheer drops.",
+ fitness:"Good fitness plus a head for heights; the last pitch is genuine hands-on climbing (aided).",
+ kids:"Confident 10+ with close supervision to Lane Cove; the summit scramble is not for young children.",
+ dogs:"Kiwi live here — fires are banned for their protection and dogs are a serious risk to them. Confirm dog rules with DOC Whangaroa before bringing one (unverified at last check).",
+ mobile:"Unreliable in the valley; some signal on the summit. Take a PLB.",
+ water:"Streams early on (treat before drinking); none on the rock — carry plenty.",
+ emergency:"Lane Cove Hut and its day shelter are the refuge point. Turn around at the base of the rock if wet or windy."},
+like:[
+ "Whangaroa Harbour is an old drowned volcanic landscape, and Kaiaraara Rocks — the Duke’s Nose — is one of its plugs: a bare andesite knuckle rearing over Pekapeka Bay. The approach up the Wairakau valley alternates farm paddocks, nīkau and kauri regrowth, and long stretches of glorious Northland mud.",
+ "From Lane Cove Hut the track tilts sharply upward. The final section climbs a near-vertical face on a fixed steel pole and rungs — brilliant fun in the dry, intimidating in the wet — and the payoff is a full-circle panorama of the harbour’s green towers and the Pacific beyond. There are no barriers on top: watch children, watch the wind."],
+features:{crowds:"Quiet by national standards; summer weekends see a steady trickle, many arriving by boat.",
+ photos:"Summit panorama over Whangaroa Harbour (afternoon light flatters the water); the hut jetty at dawn.",
+ sun:"An overnight at Lane Cove lets you climb for sunrise — the harbour is usually glassy early."},
+options:[
+ {tag:"Recommended · most popular", name:"Campbell Rd → Lane Cove → summit, return", dir:"Return", meta:{dist:"~10.5 km",time:"5–6 hr",elev:"~600 m total",diff:"Advanced"},
+  why:"The full experience: valley, hut, scramble. Start early and beat the heat on the rock.", needs:"Dry forecast; grippy footwear."},
+ {tag:"Easiest · family option", name:"Wairakau Stream Track to Lane Cove only", dir:"Return", meta:{dist:"~8 km",time:"4–5 hr",diff:"Moderate (muddy)"},
+  why:"Skip the scramble; swim at the bay and lunch at the day shelter instead.", needs:"Stream-crossing judgement after rain."},
+ {tag:"Overnight", name:"Lane Cove Hut overnight + dawn summit", dir:"Return over 2 days", meta:{dist:"as above",time:"2 easy days",diff:"Moderate–advanced"},
+  why:"The 16-bunk locked hut (door code with booking) makes this Northland’s best cheap micro-adventure.", needs:"Book online in advance; take a stove — no cooking facilities."},
+ {tag:"Boat-assisted", name:"Water taxi to Lane Cove, climb only", dir:"Return from hut", meta:{dist:"~2.5 km",time:"1.5–2 hr",diff:"Advanced scramble"},
+  why:"All summit, no mud. Popular with families with mixed abilities — walkers and boaters meet at the top.", needs:"Arrange boat from Whangaroa/Totara North."}],
+itinerary:{title:"Suggested overnight — times approximate",
+ rows:[["Day 1 · 13:00","Park Campbell Rd; cross paddocks into the valley"],["15:30","Lane Cove Hut — claim bunks, swim"],["17:30","Golden-hour recce to the rock base"],["Day 2 · 05:45","Head up for sunrise on the Nose (summer)"],["07:00","Summit — breakfast with the harbour below"],["10:30","Back at the car before the day heats up"]]},
+gear:{groups:[
+ ["Essential day kit",["Boots with real tread (clay!)","Rain shell","2 L water pp in summer","First aid + survival bag","Headtorch","Insect repellent"]],
+ ["Scramble",["Gloves help on the steel rungs","Leave poles strapped to pack for the climb","No loose items in pockets"]],
+ ["Overnight hut kit",["Sleeping bag & mat","Portable stove + fuel + cooking kit (hut has none)","Booking confirmation with door code","Toilet paper, rubbish bag (pack out)"]],
+ ["Navigation & emergency",["PLB","Offline map (Topo50 AU28)","Tide/weather check — MetService Northland"]]],
+ warn:"Do not attempt the final rock pitch in rain or strong wind, and never cross the Wairakau Stream in flood — wait it out at the hut side or turn back."},
+accom:[
+ ["Lane Cove Hut (on track)","16 bunks, locked, book online; outdoor fireplace (subject to fire season).","Booking required — from $25/adult off-peak"],
+ ["Kāeo / Totara North","Small-town motels, farmstays.","Usually available"],
+ ["Kerikeri (~40 min)","Full range: holiday parks ~$25–50, motels $120–180.","Book summer weekends"],
+ ["Whangaroa township","Game-fishing lodges, pub rooms; water-taxi departure point.","Seasonal"]],
+costs:[
+ ["Lane Cove Hut — adult","$25 (May–Sep) / $28–34 (Oct–Apr, weekday–weekend)","16 Jul 2026 · DOC seasonal rates from 1 Jul 2026"],
+ ["Lane Cove Hut — youth 5–17","from $12.50","16 Jul 2026"],
+ ["Water taxi (Whangaroa, one way, small group)","Price on application — typically ~$40–60 pp","16 Jul 2026 · unverified, ask operator"],
+ ["Parking (Campbell Rd verge)","Free","16 Jul 2026"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"St Paul’s Rock (Ohakiri) Track", loc:"Whangaroa township, 10 min drive", meta:{dist:"~1.5 km return",time:"45–60 min",diff:"Short but steep; chain-assisted",kind:"Day"},
+  why:"The same drowned-harbour panorama from the other side, in a fraction of the time — the classic quick fix, also with a chain scramble finish.", safety:"Slippery rock when damp; drop-offs.", src:{t:"DOC — St Paul’s Rock",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/whangaroa-area/"}, status:"Open (check alerts)"},
+ {rank:"2 · Best family option", name:"Mahinepua Peninsula Track", loc:"Mahinepua, ~20 min north", meta:{dist:"~5 km return",time:"1.5–2 hr",diff:"Easy–moderate",kind:"Day"},
+  why:"A ridgeline of pōhutukawa and white-sand coves; huge views for minimal climb.", safety:"Exposed to wind; sun protection.", src:{t:"DOC — Mahinepua Peninsula Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/whangaroa-area/things-to-do/mahinepua-peninsula-track/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best advanced option", name:"Cape Brett Track", loc:"Rāwhiti, Bay of Islands (~1 hr)", meta:{dist:"16.3 km one way",time:"8 hr",diff:"Advanced",kind:"Overnight (hut)"},
+  why:"Northland’s benchmark hard day/overnight — relentless ridgeline to a lighthouse-keeper hut at the cape.", safety:"Serious undertaking; water scarce; book hut & pay track fee.", src:{t:"DOC — Cape Brett Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/cape-brett-and-whangamumu-area/things-to-do/cape-brett-track/"}, status:"Check alerts before travel"},
+ {rank:"4 · Best wet-weather option", name:"Rainbow Falls / Kerikeri River Track", loc:"Kerikeri", meta:{dist:"up to 7 km return",time:"1–2.5 hr",diff:"Easy",kind:"Day"},
+  why:"A proper 27 m waterfall on an all-weather path — the sane choice when Whangaroa clay is soup.", safety:"Take care at lookouts.", src:{t:"DOC — Te Wairere Rainbow Falls",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/kerikeri-area/"}, status:"Open (check alerts)"}],
+sources:[
+ ["DOC — Dukes Nose (Kaiaraara Rocks) Track","https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/whangaroa-area/things-to-do/dukes-nose-kairaara-rocks-track/"],
+ ["DOC — Wairakau Stream Track","https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/whangaroa-area/things-to-do/wairakau-stream-track/"],
+ ["DOC — Lane Cove Hut (fees & booking)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/northland/places/whangaroa-area/things-to-do/lane-cove-hut/"],
+ ["MetService — Northland forecast","https://www.metservice.com/regions/northland"]],
+route:{caption:"Schematic: Campbell Rd → Wairakau valley → Lane Cove Hut → summit scramble. Approximate — Topo50 AU28.",
+ path:[[16,96],[34,86],[50,74],[64,66],[80,72],[96,84],[112,92],[126,86],[138,72],[148,56],[156,40],[162,28]],
+ pois:[[0,"TH","Campbell Rd verge parking"],[2,"HAZ","Stream crossings — flood risk"],[4,"VIEW","Valley clearing"],[6,"HUT","Lane Cove Hut (16 bunks, book)"],[6,"TOILET","Hut toilets & day shelter"],[8,"JCT","Duke’s Nose track junction"],[10,"HAZ","Steel rungs — vertical rock"],[11,"VIEW","Kaiaraara Rocks summit 409 m"]],
+ terrain:"harbour"},
+elev:[[0,15],[0.8,120],[1.6,190],[2.4,150],[3.2,60],[3.8,10],[4.2,80],[4.7,240],[5.1,360],[5.3,409]],
+elevNote:"One-way profile, approximate.",
+pull:"“Vertical drop-offs exist at the summit on this track which has no safety barriers.” — Department of Conservation"
+},
+
+/* ---------- 3 POUAKAI TARN ---------- */
+{
+id:"pouakai", num:"03", name:"Pouākai Tarns (Mangorei Track)", short:"Pouākai Tarns",
+region:"taranaki", lat:-39.245, lon:174.062,
+town:"New Plymouth (20 min)", townPin:{name:"New Plymouth", lat:-39.057, lon:174.075},
+tagline:"A staircase through goblin forest to the tarn that mirrors Taranaki Maunga — the North Island’s most photographed reflection.",
+type:"Return (hut overnight optional)", overnight:false, durationH:5, distKm:12.6,
+stats:{dist:"~12.6 km rtn*", time:"4–6 hr rtn", gain:"~700 m*", high:"~1,230 m*"},
+statNote:"*Approximate — DOC describes the route as ~2.5 hr each way (2 hr to Pouākai Hut + 30 min to the tarns) rather than publishing exact figures.",
+status:{level:"open", label:"Open",
+ text:"No DOC alerts found at last check. Snow and ice are common on the upper boardwalk in winter; Taranaki’s weather turns fast in any month. Check conditions with the North Taranaki DOC Visitor Centre before you go."},
+essentials:{
+ trailhead:"Car park at the end of Mangorei Road, ~20 min drive from central New Plymouth. Small and busy — arrive early or be dropped off, especially for dawn missions.",
+ surface:"Thousands of timber steps and battened boardwalk nearly the whole way — a tripping hazard when wet or icy, but mud-free by Taranaki standards.",
+ seasons:"Year-round for the well-equipped; calm, clear autumn/winter mornings give the best reflections. Winter can mean snow/ice above the bush.",
+ exposure:"Sheltered ‘goblin forest’ for two-thirds; open subalpine tussock past the hut.",
+ fitness:"Steady moderate fitness — it is a long staircase; several hours of continuous uphill.",
+ kids:"Older kids who enjoy stairs manage fine; allow extra time.",
+ dogs:"No dogs — national park (Te Papa-Kura-o-Taranaki).",
+ mobile:"Generally OK on the tops facing New Plymouth; patchy in the forest.",
+ water:"Water tank at Pouākai Hut (treat as untreated); nothing reliable on the climb.",
+ emergency:"Pouākai Hut is the shelter point. In whiteout past the hut, the boardwalk is your handrail — do not leave it. The tarns and swamp area are fragile: stay on the boardwalk."},
+like:[
+ "The Mangorei Track is an exercise in delayed gratification: two hours of steps rising through moss-hung kāmahi ‘goblin forest’, the canopy slowly shrinking until you pop out at Pouākai Hut with the Tasman Sea glittering behind you. Thirty minutes more across tussock and boardwalk brings the famous tarns.",
+ "On a still morning or evening, Taranaki Maunga — a near-perfect 2,518 m stratovolcano and a legal person under Te Pire Whakatupua mō Te Kāhui Tupua — floats upside-down in a pond the size of a living room. Then the wind gets up, the mirror shatters, and everyone waits, tripods braced, for the next lull. Even without the reflection, the Ahukawakawa swamp basin and the Pouākai tops are worth every stair."],
+features:{crowds:"Dawn and sunset in fine weather are busy — this is a bucket-list photo. Midweek and shoulder-season mornings are quiet.",
+ photos:"The tarn reflection (calm dawn/dusk); star-trails behind the maunga on moonless nights; the boardwalk leading the eye to the summit.",
+ sun:"Sunrise lights the mountain’s west face pink from the tarns; sunset backlights it — both work. Take a headtorch either way."},
+options:[
+ {tag:"Recommended · most popular", name:"Mangorei Track to the tarns, return", dir:"Return", meta:{dist:"~12.6 km",time:"4–6 hr",elev:"~700 m",diff:"Moderate"},
+  why:"The direct pilgrimage. Doable pre-dawn by torchlight on the excellent stepped track.", needs:"Headtorch for dawn/dusk trips."},
+ {tag:"Overnight · best experience", name:"Pouākai Hut overnight", dir:"Return over 2 days", meta:{dist:"as above",time:"2 short days",diff:"Moderate"},
+  why:"Sleep 30 min from the tarns and own both golden hours. The rebuilt (2025) 34-bunk hut is warm and popular.", needs:"Book year-round on the DOC site — no walk-ins."},
+ {tag:"Advanced · full traverse", name:"Pouākai Circuit", dir:"Loop, 2–3 days", meta:{dist:"~25 km",time:"2–3 days",diff:"Advanced",kind:""},
+  why:"Links the tarns with Holly Hut, Bells Falls and the eerie Ahukawakawa sphagnum swamp — Taranaki’s best multi-day.", needs:"River crossings & rougher track; check current circuit conditions with DOC."},
+ {tag:"Bad-weather alternative", name:"Turn at Pouākai Hut", dir:"Return", meta:{dist:"~11 km",time:"4 hr",diff:"Moderate"},
+  why:"If cloud is glued to the tops, the hut verandah with sea views is still a fine lunch spot; the tarns without the mountain are just ponds.", needs:"Judgement — the reflection needs calm AND clear."}],
+itinerary:{title:"Suggested overnight — times approximate",
+ rows:[["Day 1 · 15:00","Start Mangorei Rd; steady stair climb"],["17:00","Pouākai Hut — bunks, brew"],["19:30","Sunset at the tarns (10 min beyond the hut turn-off)"],["Day 2 · 05:30","Dawn at the tarns for the reflection"],["07:30","Breakfast at the hut, descend"],["10:00","Car park — coffee in New Plymouth by 10:30"]]},
+gear:{groups:[
+ ["Essential day kit",["Waterproof shell (always, in Taranaki)","Warm layers + hat/gloves","1.5 L water pp","Snacks + emergency food","First aid, survival bag","Headtorch (essential for dawn/dusk)"]],
+ ["Winter additions",["Microspikes for icy boardwalk","Insulated jacket","Check snow level — turn around if boardwalk is buried"]],
+ ["Overnight hut kit",["Sleeping bag & mat","Stove + food (hut has none)","Toilet paper (not provided)","Earplugs — 34 bunks!","Booking confirmation"]],
+ ["Photography",["Tripod for dawn/dusk","Polariser (use sparingly on reflections)","Wide lens; spare batteries in a warm pocket"]]],
+ warn:"The boardwalk protects a fragile alpine wetland — walking beside it destroys vegetation and your grip. In winter it ices over: microspikes are cheap insurance."},
+accom:[
+ ["Pouākai Hut (on track)","34 bunks, rebuilt 2025; fire, water tank, long-drops.","Booking required year-round — $25/adult (checked 16 Jul 2026 — verify on DOC)"],
+ ["New Plymouth (20 min)","Full range: hostels ~$40, motels $130–200, hotels.","Book events weekends (WOMAD etc.)"],
+ ["Egmont Eco Lodge / holiday parks","Budget beds close to the mountain’s north side.","Usually available"],
+ ["The Camphouse (North Egmont)","Historic bunkhouse at the visitor centre — handy for other Taranaki tracks.","Book via DOC/venture partners"]],
+costs:[
+ ["Pouākai Hut — adult","$25/night, booked (rate checked 16 Jul 2026 — confirm on DOC booking site)","16 Jul 2026"],
+ ["Pouākai Hut — youth 5–17","~half adult rate — confirm when booking","16 Jul 2026"],
+ ["Parking (Mangorei Rd end)","Free","16 Jul 2026"],
+ ["No shuttle needed","—","—"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Wilkies Pools Loop", loc:"Dawson Falls, east side (50 min drive)", meta:{dist:"~2.5 km loop",time:"1–1.5 hr",diff:"Easy",kind:"Day"},
+  why:"Sculpted lava plunge pools in goblin forest — the family-friendly taste of the same mountain.", safety:"Slippery rock beside pools.", src:{t:"DOC — Wilkies Pools",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/taranaki/places/te-papa-kura-o-taranaki/"}, status:"Open (check alerts)"},
+ {rank:"2 · Best quieter option", name:"Pouākai Circuit (full loop)", loc:"Same range", meta:{dist:"~25 km",time:"2–3 days",diff:"Advanced",kind:"Overnight"},
+  why:"Beyond the hut the crowds vanish; Ahukawakawa swamp is unlike anywhere else in the island.", safety:"Rougher travel, river crossings.", src:{t:"DOC — Pouākai Circuit",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/taranaki/places/te-papa-kura-o-taranaki/things-to-do/tracks/pouakai-circuit/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best short/urban option", name:"Paritutu Rock", loc:"New Plymouth port", meta:{dist:"~1 km return",time:"45 min",diff:"Steep scramble (chain)",kind:"Day"},
+  why:"A 154 m volcanic remnant over the city — sunset here mirrors the Duke’s Nose experience in miniature.", safety:"Chain-assisted; not in wind.", src:{t:"New Plymouth District Council — Paritutu",u:"https://www.npdc.govt.nz"}, status:"Open (check council)"},
+ {rank:"4 · Best wet-weather option", name:"Coastal Walkway & Te Rewa Rewa Bridge", loc:"New Plymouth", meta:{dist:"any length up to 13 km",time:"flexible",diff:"Easy, paved",kind:"Day"},
+  why:"When the maunga sulks in cloud, the whale-rib bridge still frames it the moment it clears; all-weather and flat.", safety:"Shared path — watch bikes.", src:{t:"NPDC — Coastal Walkway",u:"https://www.npdc.govt.nz/leisure-and-culture/coastal-walkway/"}, status:"Open"},
+ {rank:"5 · Advanced (summer only)", name:"Taranaki Maunga Summit Climb", loc:"North Egmont", meta:{dist:"~12.6 km return",time:"8–10 hr",diff:"Expert — alpine",kind:"Day"},
+  why:"The 2,518 m climb itself, for experienced parties in perfect summer conditions. The summit is tapu — do not stand on the very top stone; respect iwi guidance.", safety:"Serious: scree, bluffs, sudden weather; many rescues. Winter = mountaineering.", src:{t:"DOC — Taranaki Maunga Summit Climb",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/taranaki/places/te-papa-kura-o-taranaki/things-to-do/tracks/taranaki-maunga-summit-climb/"}, status:"Summer only — check alerts"}],
+sources:[
+ ["DOC — Mangorei Track to Pouākai tarns","https://www.doc.govt.nz/parks-and-recreation/places-to-go/taranaki/places/te-papa-kura-o-taranaki/things-to-do/tracks/mangorei-track/"],
+ ["DOC — Pouākai Circuit","https://www.doc.govt.nz/parks-and-recreation/places-to-go/taranaki/places/te-papa-kura-o-taranaki/things-to-do/tracks/pouakai-circuit/"],
+ ["Venture Taranaki — Mangorei Track listing","https://www.taranaki.co.nz/explore/listing/mangorei-track-to-pouakai-tarn"],
+ ["MetService — Egmont National Park forecast","https://www.metservice.com/outdoor/parks/egmont-national-park"]],
+route:{caption:"Schematic: Mangorei Rd → stepped climb → Pouākai Hut → tarns. Approximate — Topo50 BJ29.",
+ path:[[20,106],[36,98],[50,88],[62,76],[74,64],[86,54],[100,46],[114,40],[128,38],[142,34],[156,28],[170,26]],
+ pois:[[0,"TH","Mangorei Rd car park (small)"],[2,"WTR","Stream (treat water)"],[4,"VIEW","Canopy break — sea views"],[7,"HUT","Pouākai Hut · 34 bunks, book"],[7,"TOILET","Hut long-drops"],[9,"JCT","Circuit junction — keep left"],[11,"VIEW","Pouākai tarns — boardwalk only"]],
+ terrain:"cone"},
+elev:[[0,520],[1,660],[2,790],[3,910],[4,1060],[5,1180],[5.7,1250],[6.3,1230]],
+elevNote:"One-way profile, approximate.",
+pull:"On a windless dawn the tarn holds the whole 2,518-metre maunga in a pond you could wade across."
+},
+
+/* ---------- 4 KIME HUT ---------- */
+{
+id:"kime", num:"04", name:"Kime Hut via Field Hut", short:"Kime Hut",
+region:"kapiti", lat:-40.925, lon:175.225,
+town:"Ōtaki (19 km to road end)", townPin:{name:"Ōtaki", lat:-40.758, lon:175.145},
+tagline:"The Tararua apprenticeship: a long climb from Ōtaki Forks to a cold, cloud-raked 20-bunk hut on the Southern Crossing.",
+type:"Return · overnight tramp", overnight:true, durationH:14, distKm:27,
+stats:{dist:"~27 km rtn*", time:"6–8 hr up*", gain:"~1,330 m", high:"~1,430 m"},
+statNote:"*Currently longer: an active slip blocks Ōtaki Gorge Road — add ~2 hr each way on the emergency access track. Distances approximate.",
+status:{level:"part", label:"Open — access detour",
+ text:"An active slip blocks vehicle access to Ōtaki Forks. Park before the slip and use the emergency access track (roughly +2 hr each way). Kime Hut itself is open (standard hut, no bookings). Winter on the Southern Crossing is full alpine terrain — navigation in cloud kills people here; this range has one of NZ’s worst exposure records."},
+essentials:{
+ trailhead:"Ōtaki Gorge Road end (Ōtaki Forks), 19 km inland from Ōtaki township — currently reached on foot via the emergency access track past the slip.",
+ surface:"Benched historic track to Field Hut; above it, rooty then open tussock ridge with a poled route; rock and alpine herbfield to Kime.",
+ seasons:"November–April for most. Winter needs ice axe/crampons and whiteout navigation skills.",
+ exposure:"Above Table Top (~1,050 m) you are on an exposed ridge for hours — Tararua wind and mist are notorious.",
+ fitness:"High — a 1,300 m+ day with a loaded pack, currently with a 2-hr access tax each way.",
+ kids:"Strong teens with tramping experience; not younger children.",
+ dogs:"No dogs without a DOC permit (forest park rules) — confirm with DOC Kāpiti/Wellington.",
+ mobile:"Patchy to none. PLB essential.",
+ water:"Tank at Field Hut and Kime Hut (treat); nothing reliable on the tops in summer.",
+ emergency:"Field Hut (1924, 20 bunks) is the all-weather fallback 2–3 hr below Kime. In deteriorating weather, drop back below the bushline — do not push on to Kime in whiteout."},
+like:[
+ "This is classic Tararua tramping: a relentless, beautifully engineered climb through podocarp then silver beech, past the oldest purpose-built tramping hut in the country (Field Hut, 1924), and out onto tussock tops where the wind owns everything. On a clear day you can see Kāpiti Island, the South Island, and the whole spine of the Southern Crossing.",
+ "Kime Hut itself is famously cold — rebuilt in 2014, 20 bunks, deliberately unheated at 1,400 m — and that is part of the education. The Tararuas are where Wellington trampers learn respect: the range manufactures its own weather, and the gap between ‘breezy at the car park’ and ‘crawling on the ridge’ is about an hour."],
+features:{crowds:"Field Hut gets weekend traffic; Kime is quiet midweek. Southern Crossing parties pass through in summer.",
+ photos:"Dawn above a cloud inversion from Kime’s doorstep; Field Hut’s historic timber interior; Kāpiti Island from Table Top.",
+ sun:"Winter days are brutally short — be below the bushline by mid-afternoon."},
+options:[
+ {tag:"Recommended", name:"Ōtaki Forks → Field Hut → Kime Hut, return", dir:"Return, overnight at Kime or Field", meta:{dist:"~27 km rtn (+ access track)",time:"6–8 hr up",elev:"+1,330 m",diff:"Advanced"},
+  why:"The standard route with the historic-hut waypoint and the safest retreat options.", needs:"Hut tickets or Backcountry Hut Pass; winter = alpine kit."},
+ {tag:"Easiest · best first overnight", name:"Ōtaki Forks → Field Hut only", dir:"Return, overnight", meta:{dist:"~11 km rtn (+ access)",time:"2.5–3 hr up",elev:"+760 m",diff:"Moderate"},
+  why:"A gentler target below the weather; the 1924 hut is a destination in itself.", needs:"Hut tickets; first-come, first-served."},
+ {tag:"Advanced · classic traverse", name:"Southern Crossing (Ōtaki Forks → Kime → Alpha → Kaitoke)", dir:"Point-to-point, 2–3 days", meta:{dist:"~35 km",time:"2–3 days",diff:"Advanced–expert",kind:""},
+  why:"The historic Tararua traverse over Mt Hector (1,529 m) and the Dress Circle — a serious, committing classic.", needs:"Transport at both ends; stable multi-day forecast; strong navigation."},
+ {tag:"Bad-weather alternative", name:"Stay low: Ōtaki Forks river flats & Arcus Loop area", dir:"Various short walks", meta:{dist:"1–5 km",time:"up to 2 hr",diff:"Easy"},
+  why:"If the tops are in storm, the Forks’ river terraces are still a good day out — subject to the same road-slip detour.", needs:"Check the slip/access status first."}],
+itinerary:{title:"Suggested 2-day (summer) — times approximate",
+ rows:[["Day 1 · 08:00","Park before the slip; emergency access track to Ōtaki Forks (~2 hr)"],["10:15","Start the climb — steady benched grades"],["13:00","Field Hut — long lunch, water top-up"],["14:30","Table Top; poled tussock ridge"],["16:30","Bridge Peak, sidle to Kime Hut"],["17:00","Kime Hut — warm layers on immediately"],["Day 2 · 07:30","Optional: Mt Hector return (~2 hr) in good weather"],["10:00","Descend; Forks by mid-afternoon, car ~2 hr later"],["Turnaround","Not at Field Hut by 14:00? Stay there instead — Kime can wait."]]},
+gear:{groups:[
+ ["Essential tramping kit",["Full storm shell + overtrousers","Fleece + insulated jacket (Kime is unheated!)","Hat, gloves ×2, buff","Boots with ankle support","2 L water capacity pp","2 days’ food + emergency extra","First aid, survival bags"]],
+ ["Alpine (May–Oct, or any dodgy forecast)",["Ice axe & crampons + skills","Map & compass — and real skill in cloud","Storm-rated tent or bivvy as backup","Goggles"]],
+ ["Hut kit",["Sleeping bag rated to −5°C minimum","Stove, fuel, pot (no cooking gear in huts)","Hut tickets / Backcountry Hut Pass","Candle/lantern — Kime has no lighting"]],
+ ["Navigation & emergency",["PLB — non-negotiable here","Topo50 BP33/BP34 offline + paper","Trip intentions left with a contact"]]],
+ warn:"The Tararua tops in bad weather are a navigation trap — the Southern Crossing has a long fatality history from exposure. If cloud is down and wind is up, Field Hut is the summit today."},
+accom:[
+ ["Kime Hut (on track)","20 bunks, standard, unheated, water tank, long-drop.","No booking — hut tickets: $15/adult (from 1 Jul 2026)"],
+ ["Field Hut (on track)","20 bunks, historic (1924), wood-panelled shelter below the bushline.","No booking — standard hut fees"],
+ ["Ōtaki township","Motels, holiday park; last supplies at Ōtaki or the SH1 outlets.","Usually available"],
+ ["Parawai Lodge (Ōtaki Forks)","Club lodge at the Forks (Tararua Tramping Club) — check availability.","By arrangement"]],
+costs:[
+ ["Kime/Field Hut — adult","$15/night (standard hut rate from 1 Jul 2026)","16 Jul 2026"],
+ ["Kime/Field Hut — youth 5–17","$7.50/night","16 Jul 2026"],
+ ["Backcountry Hut Pass (unlimited standard huts, 12 months)","Check current price on DOC","16 Jul 2026"],
+ ["Parking (before the slip)","Free — don’t block the emergency access","16 Jul 2026"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Powell Hut / Mt Holdsworth", loc:"Eastern Tararua, Holdsworth road end (~1.5 hr drive)", meta:{dist:"~15 km rtn",time:"4 hr up",diff:"Advanced",kind:"Overnight"},
+  why:"The same tops-experience with a serviced, heated, bookable hut and intact road access — featured in full below.", safety:"Same alpine rules above the bush.", src:{t:"DOC — Powell Hut",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/powell-hut/"}, status:"Open — booking required"},
+ {rank:"2 · Best shorter option", name:"Field Hut overnight", loc:"Same track, lower", meta:{dist:"~11 km rtn",time:"2.5–3 hr up",diff:"Moderate",kind:"Overnight"},
+  why:"Historic hut, bushline views, none of the exposure — the classic first Tararua overnight.", safety:"Same access detour applies.", src:{t:"DOC — Field Hut",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/field-hut-historic/"}, status:"Open — access detour"},
+ {rank:"3 · Best lower-risk option", name:"Paekākāriki Escarpment Track", loc:"Kāpiti Coast (25 min)", meta:{dist:"10 km one way",time:"3.5–4 hr",diff:"Moderate",kind:"Day"},
+  why:"Big coastal views and 1,200 steps without alpine risk — featured in full below.", safety:"Vertigo-inducing drop-offs, but no weather trap.", src:{t:"WellingtonNZ — Escarpment Track",u:"https://www.wellingtonnz.com/visit/trails/escarpment-track"}, status:"Open"},
+ {rank:"4 · Best advanced option", name:"Southern Crossing full traverse", loc:"Ōtaki Forks → Kaitoke", meta:{dist:"~35 km",time:"2–3 days",diff:"Advanced–expert",kind:"Overnight"},
+  why:"If Kime whets the appetite, this is the meal: Hector, the Beehives, Alpha Hut and out.", safety:"Committing; escape routes are long.", src:{t:"Tararua Tramping Club — Southern Crossing",u:"https://www.ttc.org.nz/TararuaFootprints/SouthernCrossing"}, status:"Open — access detour at Forks end"}],
+sources:[
+ ["DOC — Kime Hut (fees, times, access)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/kime-hut/"],
+ ["DOC — Field Hut (historic)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/field-hut-historic/"],
+ ["WellingtonNZ — Ōtaki Forks to Kime Hut (slip/access note)","https://www.wellingtonnz.com/visit/trails/otaki-forks-to-kime-hut"],
+ ["Tararua Tramping Club — Southern Crossing route guide","https://www.ttc.org.nz/TararuaFootprints/SouthernCrossing"],
+ ["MetService — Tararua Forest Park forecast","https://www.metservice.com/outdoor/parks/tararua-forest-park"]],
+route:{caption:"Schematic: slip detour → Ōtaki Forks → Field Hut → Table Top → Kime. Approximate — Topo50 BP33/BP34.",
+ path:[[10,108],[24,104],[38,100],[52,92],[64,82],[76,70],[88,60],[102,52],[116,46],[130,40],[144,32],[158,26],[170,24]],
+ pois:[[0,"TH","Park before the slip"],[1,"HAZ","Active slip — emergency access track"],[2,"TH","Ōtaki Forks (Boielle Flat)"],[4,"WTR","Stream — last easy water (treat)"],[6,"HUT","Field Hut (1924) · 20 bunks"],[8,"VIEW","Table Top — poled route begins"],[10,"HAZ","Exposed ridge — wind/whiteout"],[11,"JCT","Bridge Peak jct (Southern Crossing)"],[12,"HUT","Kime Hut · 20 bunks, unheated"]],
+ terrain:"range"},
+elev:[[0,100],[1,120],[2,160],[3.5,380],[5,640],[6.5,860],[8,1047],[10,1220],[11.5,1360],[13,1430],[13.5,1400]],
+elevNote:"One-way profile from the slip car park, approximate.",
+pull:"“It sits above the bushline — there is no heating so it can get very cold.” — Department of Conservation, on Kime Hut"
+},
+
+/* ---------- 5 TAMA LAKES ---------- */
+{
+id:"tama", num:"05", name:"Tama Lakes Track", short:"Tama Lakes",
+region:"centralplateau", lat:-39.24, lon:175.60,
+town:"Whakapapa Village (trailhead)", townPin:{name:"Whakapapa Village", lat:-39.20, lon:175.54},
+tagline:"Two explosion-crater lakes in the saddle between Ruapehu and Ngāuruhoe — the crossing’s scenery with half the risk and none of the shuttles.",
+type:"Return", overnight:false, durationH:6, distKm:17,
+stats:{dist:"17 km rtn", time:"5–6 hr", gain:"~400 m", high:"~1,440 m*"},
+statNote:"*Upper viewpoint elevation approximate.",
+status:{level:"open", label:"Open — alpine in winter",
+ text:"No closures found at last check. Winter requires alpine skills and equipment (snow, ice, avalanche risk on the upper section). The gullies down to both lakes are steep and unstable — there are no formed tracks to the water; enjoy them from the viewpoints."},
+essentials:{
+ trailhead:"Whakapapa Village, 100 m below the Tongariro National Park Visitor Centre on Ngauruhoe Place. Park in the village.",
+ surface:"Well-formed gravel and boardwalk to Taranaki Falls; poled tussock and gravel fields beyond; the final pull to the Upper Tama viewpoint is an unformed, loose ‘advanced’ side trip.",
+ seasons:"October–May for most walkers; a serious snow trip in winter.",
+ exposure:"Open tussock and gravel most of the way — full sun and full wind; no shelter after the falls.",
+ fitness:"Moderate — long but never brutally steep until the optional last climb.",
+ kids:"Active kids manage Lower Tama on a good day; the Upper viewpoint climb is loose and windy.",
+ dogs:"No dogs — national park.",
+ mobile:"Reasonable near the village, patchy at the saddle.",
+ water:"None safe on track — carry all you need.",
+ emergency:"Taranaki Falls shelter belt is the last easy turnaround; in wind, skip the Upper viewpoint — Lower Tama still delivers."},
+like:[
+ "The Tama Lakes fill two old explosion craters strung across the saddle between Ruapehu and Ngāuruhoe, and the walk to them is an open-air geology lesson: golden tussock, andesite boulder fields, and the two giant volcanoes trading places on the skyline as the track bends.",
+ "Taranaki Falls, 2 km in, makes the whole family section worthwhile — a 20 m curtain over the lip of a lava flow. Beyond, the country empties out. Lower Tama is a ten-minute detour to a lookout; Upper Tama is a 35-minute grunt up a loose ridge to a rim where, on a still day, the lake sits impossibly blue 100 m below and Ngāuruhoe fills your entire field of view."],
+features:{crowds:"A fraction of the crossing’s traffic; you will have stretches alone even in January.",
+ photos:"Upper Tama rim with Ngāuruhoe behind (late morning); Taranaki Falls rainbow (early afternoon); Ruapehu over Lower Tama.",
+ sun:"East-facing lakes light up in the morning; afternoon wind is common — go early."},
+options:[
+ {tag:"Recommended · most popular", name:"Whakapapa → both Tama viewpoints, return", dir:"Return", meta:{dist:"17 km",time:"5–6 hr",elev:"~400 m",diff:"Moderate + advanced side trip"},
+  why:"The complete day. Do the falls loop’s upper branch outbound and the river branch home for variety.", needs:"Full alpine layers despite the gentle grades."},
+ {tag:"Best shorter option", name:"Lower Tama viewpoint only", dir:"Return", meta:{dist:"~14 km",time:"4–4.5 hr",diff:"Moderate"},
+  why:"Skips the loose upper climb but keeps both volcanoes and the lake colour.", needs:"—"},
+ {tag:"Family option", name:"Taranaki Falls Loop only", dir:"Loop", meta:{dist:"6 km",time:"2 hr",diff:"Easy"},
+  why:"The best short walk in the park; turn around here with kids or in weather.", needs:"—"},
+ {tag:"Winter option", name:"Guided or experienced-party snow trip", dir:"Return", meta:{dist:"17 km",time:"6–8 hr",diff:"Alpine"},
+  why:"Under snow the saddle is magnificent and quiet — for equipped, avalanche-aware parties only.", needs:"Ice axe/crampons, avalanche forecast (avalanche.net.nz)."}],
+itinerary:{title:"Suggested day — times approximate",
+ rows:[["08:00","Whakapapa Village — take the upper falls branch"],["08:45","Taranaki Falls — photos from below the curtain"],["10:30","Lower Tama lookout detour"],["11:30","Upper Tama viewpoint — lunch out of the wind on the leeward side"],["13:00","Start back"],["15:30","Village — pie and coffee at the café"],["Turnaround","Wind stopping you walking straight? Skip the upper ridge."]]},
+gear:{groups:[
+ ["Essential day kit",["Windproof shell — always","Warm layers, hat, gloves","Sunhat + SPF50 (zero shade)","2 L water pp","Lunch + spare food","First aid, survival bag, headtorch"]],
+ ["Winter additions",["Ice axe & crampons + skills","Avalanche forecast checked","Goggles, insulated layers"]],
+ ["Navigation & emergency",["Offline Topo50 BJ34","PLB recommended","Told someone your plan"]],
+ ["Photography",["Polariser makes the lakes glow","Telephoto compresses Ngāuruhoe over Upper Tama"]]],
+ warn:"Do not descend the gullies to the lakes — the walls are steep, loose and unstable, and there are no formed tracks to the water."},
+accom:[
+ ["Whakapapa Village (trailhead)","Hotel, holiday park, café; walk to the track.","Book ahead in season"],
+ ["National Park Village (15 min)","Backpackers to lodges; more choice.","Book weekends"],
+ ["Tūrangi / Ohakune (~40 min)","Motels, holiday parks either side of the massif.","Usually available"],
+ ["Mangahuia Campsite (DOC)","Basic campsite on SH47.","Standard DOC fees — check current rate"]],
+costs:[
+ ["Track access & parking","Free","16 Jul 2026"],
+ ["No booking required","—","16 Jul 2026"],
+ ["Optional guided winter trip","from ~$200 pp typical","16 Jul 2026 · verify with operator"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Tongariro Alpine Crossing", loc:"Same park (20 min to Mangatepōpō)", meta:{dist:"19.4 km",time:"7–9 hr",diff:"Advanced",kind:"Day"},
+  why:"The step up: more colour, more crowds, more exposure. Featured in full above.", safety:"Alpine — see its guide.", src:{t:"DOC — Tongariro Alpine Crossing",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tongariro-alpine-crossing/"}, status:"Open — conditions apply"},
+ {rank:"2 · Best shorter option", name:"Taranaki Falls Loop", loc:"Same trailhead", meta:{dist:"6 km",time:"2 hr",diff:"Easy",kind:"Day"},
+  why:"First two kilometres of the same track — the natural bail-out and family version.", safety:"—", src:{t:"DOC — Taranaki Falls Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/taranaki-falls-track/"}, status:"Open"},
+ {rank:"3 · Best quieter option", name:"Silica Rapids Track", loc:"Whakapapa Village", meta:{dist:"7 km loop",time:"2.5 hr",diff:"Easy",kind:"Day"},
+  why:"Forest, terraces and hardly anyone on it.", safety:"—", src:{t:"DOC — Silica Rapids Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/silica-rapids-track/"}, status:"Open"},
+ {rank:"4 · Best overnight option", name:"Tongariro Northern Circuit", loc:"From Whakapapa Village", meta:{dist:"~45 km",time:"3–4 days",diff:"Great Walk",kind:"Overnight"},
+  why:"Tama saddle is day one of the circuit anyway — keep walking. New hut and route section opened May 2026.", safety:"Book huts; alpine planning.", src:{t:"DOC — Tongariro Northern Circuit",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tongariro-northern-circuit/"}, status:"Open — new route (check alerts)"}],
+sources:[
+ ["DOC — Tama Lakes Track","https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/things-to-do/tracks/tama-lakes-track/"],
+ ["Tongariro National Park Visitor Centre — +64 7 892 3729 (current conditions)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/central-north-island/places/tongariro-national-park/"],
+ ["MetService — Tongariro National Park","https://www.metservice.com/outdoor/parks/tongariro-national-park"],
+ ["NZ Avalanche Advisory (winter)","https://www.avalanche.net.nz"]],
+route:{caption:"Schematic: Whakapapa Village → Taranaki Falls → Tama saddle viewpoints. Approximate — Topo50 BJ34.",
+ path:[[16,60],[30,56],[44,52],[58,56],[72,60],[86,58],[100,54],[114,52],[128,50],[142,44],[154,36],[164,28]],
+ pois:[[0,"TH","Whakapapa Village (visitor centre)"],[2,"VIEW","Taranaki Falls"],[2,"TOILET","Falls junction toilet"],[5,"JCT","Falls loop splits — either branch"],[8,"JCT","Lower Tama lookout detour (10 min)"],[9,"VIEW","Lower Tama Lake"],[10,"HAZ","Loose, exposed climb (advanced)"],[11,"VIEW","Upper Tama viewpoint ~1,440 m"]],
+ terrain:"volcano"},
+elev:[[0,1120],[1,1160],[2,1200],[3.5,1270],[5,1310],[6,1330],[7,1360],[7.8,1410],[8.5,1440]],
+elevNote:"One-way profile, approximate.",
+pull:"“There are no formed tracks down to Lower or Upper Tama Lakes — the gullies leading down to them are steep and unstable.” — Department of Conservation"
+},
+/* ---------- 6 MERCER BAY ---------- */
+{
+id:"mercer", num:"06", name:"Mercer Bay Loop Track", short:"Mercer Bay Loop",
+region:"auckland", lat:-36.988, lon:174.465,
+town:"Piha (10 min) / Auckland (50 min)", townPin:{name:"Auckland", lat:-36.85, lon:174.763},
+tagline:"Fifty minutes on some of the highest sea cliffs in the Waitākere Ranges — black sand, pā history and Tasman swell far below.",
+type:"Loop", overnight:false, durationH:1, distKm:2.2,
+stats:{dist:"2.2 km", time:"~50 min", gain:"~80 m", high:"~220 m"},
+status:{level:"open", label:"Open",
+ text:"Open at last check (many other Waitākere tracks remain closed for kauri dieback — always confirm current status on Auckland Council’s website). Gates at Log Race Road operate 6 am–9 pm. Use the kauri hygiene stations at the entrance."},
+essentials:{
+ trailhead:"Log Race Road car park (off Piha Road), site of a former radio station. Public toilets at the start.",
+ surface:"Well-formed gravel path and steps; firm in most weather. Clifftop fences at lookouts, but long unfenced stretches — stay on the track.",
+ seasons:"All year. Winter storms make the Tasman spectacular (and the wind serious).",
+ exposure:"Full coastal exposure — 200 m, near-vertical cliffs directly below the track.",
+ fitness:"Low — a walk, not a tramp, with a few flights of steps.",
+ kids:"Yes, with hands held near edges. The drops are absolute.",
+ dogs:"Rules vary across the Waitākere Ranges Regional Park — check Auckland Council’s current dog policy before bringing one (unverified at last check).",
+ mobile:"Generally good.",
+ water:"None on track — bring a bottle.",
+ emergency:"Short track, near the road; phone coverage is your friend here."},
+like:[
+ "For effort-to-drama ratio, nothing else on this list comes close. Ten minutes from the car you are on the rim of cliffs that drop almost sheer to Mercer Bay’s black sand, with the Tasman heaving below and gannets riding the updraft at eye level.",
+ "The headland, Te Ahua Point, holds the earthworks of a pā of Te Kawerau ā Maki — interpretive signs tell the story — and the loop’s inland half returns through wind-shorn mānuka scrub. Come at golden hour: the west-facing cliffs catch fire, and Auckland’s best free sunset show plays out over the water."],
+features:{crowds:"Popular but rarely packed; sunset in summer is the busy slot.",
+ photos:"Te Ahua Point silhouette at sunset; the cleft view south to Karekare; winter swell hammering the base of the cliffs.",
+ sun:"A pure sunset track — west-facing the entire way. Take a torch for the walk back after the light show; gates close 9 pm."},
+options:[
+ {tag:"Recommended", name:"Standard loop (clockwise)", dir:"Loop, clockwise from the southern car park entrance", meta:{dist:"2.2 km",time:"~50 min",diff:"Easy walking"},
+  why:"Clockwise saves the best clifftop stretch for second half and puts the pā interpretive signs early.", needs:"—"},
+ {tag:"Harder extension", name:"Add Comans Track toward Karekare", dir:"Side trip, return", meta:{dist:"+2–4 km",time:"+1–2 hr",diff:"Moderate, steep"},
+  why:"Drops steeply off the loop toward Karekare with ever-bigger cliff views — check current track status before committing (Waitākere closures change).", needs:"Legs for the climb back; council track-status check."},
+ {tag:"Wet-weather note", name:"The loop itself in drizzle", dir:"Loop", meta:{dist:"2.2 km",time:"~50 min",diff:"Easy"},
+  why:"The gravel surface handles rain well and mist on the cliffs is atmospheric — just keep well back from edges in wind.", needs:"Windproof layer."}],
+itinerary:{title:"Golden-hour plan — times approximate (summer)",
+ rows:[["19:00","Park Log Race Rd; kauri hygiene station"],["19:15","Te Ahua Point pā — read the signs while the light warms"],["19:45","Main lookout for sunset proper"],["20:30","Loop back inland leg with a torch"],["20:50","Car park — gates close at 21:00, don’t cut it fine"]]},
+gear:{groups:[
+ ["Essentials",["Windproof jacket (always, on this coast)","Water bottle","Sunhat/sunscreen in summer","Phone","Torch if staying for sunset"]],
+ ["With kids",["Hold hands near edges — drops are unfenced in places","Snacks buy patience at lookouts"]],
+ ["Photography",["Wide lens for the cliff sweep","ND/polariser for swell texture","Tripod for dusk"]]],
+ warn:"The cliff edges are undercut and fatal. Stay on the formed track — every year people cross barriers for photos on this coast."},
+accom:[
+ ["Piha (10 min)","Baches, B&Bs, Piha Domain camping.","Book summer weekends"],
+ ["Karekare","Limited holiday rentals.","Book ahead"],
+ ["Auckland city (50 min)","Everything.","—"]],
+costs:[
+ ["Parking & track","Free","16 Jul 2026"],
+ ["No bookings, huts or shuttles","—","—"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Kitekite Falls Track", loc:"Piha, 10 min drive", meta:{dist:"~2.5 km return",time:"1–1.5 hr",diff:"Easy",kind:"Day"},
+  why:"The Waitākeres’ signature waterfall — a three-tier 40 m drop with a swimming hole; the natural pairing with Mercer Bay for a Piha day.", safety:"Kauri hygiene stations mandatory; slippery rocks.", src:{t:"Auckland Council — Kitekite Track",u:"https://www.aucklandcouncil.govt.nz/parks-recreation/get-outdoors/aklpaths/Pages/default.aspx"}, status:"Open (check council)"},
+ {rank:"2 · Best short option", name:"Tasman Lookout Track (The Gap)", loc:"South Piha", meta:{dist:"~1 km return",time:"30–40 min",diff:"Easy",kind:"Day"},
+  why:"Overlooks The Gap’s blowhole channel and Taitomo Island — maximum coast per minute.", safety:"Cliff edges.", src:{t:"Auckland Council — Tasman Lookout",u:"https://www.aucklandcouncil.govt.nz/parks-recreation/get-outdoors/aklpaths/Pages/default.aspx"}, status:"Open (check council)"},
+ {rank:"3 · Best wet-weather option", name:"Arataki Visitor Centre & Nature Trail", loc:"Scenic Drive, 20 min", meta:{dist:"1 km loop",time:"30–45 min",diff:"Easy",kind:"Day"},
+  why:"Carvings, exhibitions and a boardwalk nature trail — the roof matters on a westerly day.", safety:"—", src:{t:"Auckland Council — Arataki",u:"https://www.aucklandcouncil.govt.nz/parks-recreation/get-outdoors/aklpaths/Pages/default.aspx"}, status:"Open"},
+ {rank:"4 · Best advanced option", name:"Hillary Trail (open sections)", loc:"Waitākere Ranges", meta:{dist:"multi-day, sections vary",time:"1–4 days",diff:"Advanced",kind:"Overnight"},
+  why:"The coast’s epic — but significant portions have been rerouted or closed for kauri dieback; walk only currently open sections.", safety:"Check every section’s status with Auckland Council first.", src:{t:"Auckland Council — Hillary Trail status",u:"https://www.aucklandcouncil.govt.nz/parks-recreation/Pages/default.aspx"}, status:"Partially open — verify"}],
+sources:[
+ ["Auckland Council — Mercer Bay Loop Track (official page: 2.2 km, 50 min)","https://www.aucklandcouncil.govt.nz/en/parks-recreation/get-outdoors/aklpaths/path-detail/380.html"],
+ ["Kauri Protection NZ — kauri dieback hygiene & track status","https://www.kauriprotection.co.nz"],
+ ["Auckland NZ (ATEED) — Mercer Bay Loop","https://www.aucklandnz.com/explore/mercer-bay-loop-track"],
+ ["MetService — Auckland forecast","https://www.metservice.com/towns-cities/locations/auckland"]],
+route:{caption:"Schematic loop from Log Race Road. Approximate — the real track is fully formed and signposted.",
+ path:[[40,30],[60,34],[80,42],[96,54],[104,68],[100,84],[86,94],[68,96],[52,90],[42,76],[36,58],[36,42],[40,30]],
+ pois:[[0,"TH","Log Race Rd car park · gates 6am–9pm"],[0,"TOILET","Public toilets"],[3,"VIEW","Te Ahua Point pā site"],[5,"VIEW","Main cliff lookout (~220 m above sea)"],[6,"HAZ","Unfenced cliff edges"],[8,"JCT","Comans Track junction (to Karekare)"]],
+ terrain:"coast"},
+elev:[[0,215],[0.35,225],[0.7,205],[1.1,180],[1.5,200],[1.9,220],[2.2,215]],
+elevNote:"Loop profile, approximate.",
+pull:"Gannets ride the updraft at eye level while the Tasman works the cliff base two hundred metres below your boots."
+},
+
+/* ---------- 7 PAEKĀKĀRIKI ESCARPMENT ---------- */
+{
+id:"escarpment", num:"07", name:"Paekākāriki Escarpment Track", short:"Escarpment Track",
+region:"kapiti", lat:-40.975, lon:174.965,
+town:"Paekākāriki / Pukerua Bay (rail at both ends)", townPin:{name:"Wellington", lat:-41.29, lon:174.776},
+tagline:"The ‘Stairway to Heaven’: 1,200 steps and two swing bridges strung along a coastal escarpment 220 m above State Highway 59 and the sea.",
+type:"Point-to-point", overnight:false, durationH:4, distKm:10,
+stats:{dist:"10 km", time:"3.5–4 hr", gain:"~450 m", high:"~220 m"},
+status:{level:"open", label:"Open",
+ text:"No closures or alerts found at last check. The track is narrow, steep and exposed in places with big drop-offs — Te Araroa Trust advises against it for people uneasy with heights, and in strong northerlies it is genuinely unpleasant. Little shade or water: carry plenty in summer."},
+essentials:{
+ trailhead:"Between Paekākāriki Railway Station and Pukerua Bay Railway Station — the train makes it a perfect one-way walk (Kāpiti Line). Most people start at Pukerua Bay and finish at Paekākāriki’s cafés.",
+ surface:"Formed single-file benched track, long staircases (~1,200 steps), two swing bridges; a farmland/road section at each end.",
+ seasons:"All year. Summer afternoons are hot and shadeless; winter southerlies bring rain squalls off the strait.",
+ exposure:"High-perch exposure: steep grassy escarpment dropping to the highway and sea; not for vertigo sufferers.",
+ fitness:"Moderate — the stair sections are honest work.",
+ kids:"Sure-footed kids 8+ used to heights; keep them close on narrow benches.",
+ dogs:"Not permitted on the escarpment section (Te Araroa crosses private and council land) — verify current rules with Te Araroa Trust / KCDC before bringing one.",
+ mobile:"Good along most of the track.",
+ water:"None on track. 1.5 L+ each in summer.",
+ emergency:"Multiple stiles/farm exits at the southern end; otherwise the two stations are the exits. Steep bail-outs do not exist mid-track."},
+like:[
+ "This is Wellington’s great commuter-line adventure: catch the train to one end, walk home along a ribbon of track pinned to the escarpment face, catch the train back. Below, SH59 and the main trunk line shrink to model-railway scale; ahead, Kāpiti Island sits like a sleeping taniwha on the strait.",
+ "The two swing bridges bounce satisfyingly over regenerating gullies, the stairways keep arriving (locals train on them), and on a clear day the South Island’s Kaikōura Ranges float on the horizon. It earns its ‘Stairway to Heaven’ nickname both ways: the views, and the quad burn."],
+features:{crowds:"Busy on fine weekends — single-file passing etiquette matters. Weekday mornings are lovely.",
+ photos:"Kāpiti Island from the high point; the swing bridges from their far ends; trains threading the coast below.",
+ sun:"West-facing — afternoon light is gorgeous but hot in summer; morning is cooler with the sun behind you southbound."},
+options:[
+ {tag:"Recommended · most popular", name:"Pukerua Bay → Paekākāriki (northbound)", dir:"One way", meta:{dist:"10 km",time:"3.5–4 hr",elev:"~450 m of ups",diff:"Moderate"},
+  why:"Finishes at Paekākāriki village’s cafés and beach; the big descent staircase faces the Kāpiti view.", needs:"Train timetable (Kāpiti Line, ~hourly+)."},
+ {tag:"Reverse", name:"Paekākāriki → Pukerua Bay (southbound)", dir:"One way", meta:{dist:"10 km",time:"3.5–4 hr",diff:"Moderate"},
+  why:"Cooler morning sun at your back; slightly gentler start.", needs:"Same train logistics."},
+ {tag:"Shorter taste", name:"Paekākāriki end out-and-back to the first lookouts", dir:"Return", meta:{dist:"4–6 km",time:"1.5–2 hr",diff:"Easy–moderate"},
+  why:"Good with visitors or kids — turn around before the big stair sections.", needs:"—"},
+ {tag:"Bad-weather alternative", name:"Don’t — do the beach instead", dir:"—", meta:{dist:"—",time:"—",diff:"—"},
+  why:"In a strong northerly or heavy rain the narrow benches are miserable and the drop-offs unforgiving; walk Paekākāriki Beach or Queen Elizabeth Park instead.", needs:"Judgement."}],
+itinerary:{title:"Suggested half-day (northbound) — times approximate",
+ rows:[["09:10","Train to Pukerua Bay Station"],["09:30","Road/farm section to the escarpment proper"],["10:30","First swing bridge; stair country begins"],["11:15","High point (~220 m) — Kāpiti Island panorama, snack stop"],["12:15","Second swing bridge, long descent staircase"],["13:00","Paekākāriki village — fish’n’chips or café lunch"],["13:45","Train home"]]},
+gear:{groups:[
+ ["Essentials",["1.5 L+ water pp (none on track)","Sunhat + sunscreen (no shade)","Windproof layer","Snacks","Phone + train timetable","Grippy walking shoes"]],
+ ["Comfort",["Poles help on the 1,200 steps down","Cash/card for the café finish"]],
+ ["Photography",["A mid-zoom for Kāpiti Island","Morning haze filter = polariser"]]],
+ warn:"Not a track for a fear of heights or for toddlers — long narrow sections have steep unfenced drop-offs to the highway corridor below."},
+accom:[
+ ["Paekākāriki village","Beach motor camp, B&Bs; the pub and cafés anchor the finish.","Book summer"],
+ ["Kāpiti Coast (Paraparaumu/Waikanae, 10–20 min)","Full motel/holiday-park range.","Usually available"],
+ ["Wellington city (45 min by train)","Everything — this is an easy day trip by rail.","—"]],
+costs:[
+ ["Track access","Free","16 Jul 2026"],
+ ["Train (Wellington ⇄ Pukerua Bay/Paekākāriki, Metlink)","A few dollars per zone-leg — check current Metlink fares","16 Jul 2026 · fares change; verify"],
+ ["Parking (either station)","Free park-and-ride, fills weekdays","16 Jul 2026"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Queen Elizabeth Park coastal tracks", loc:"Paekākāriki–Raumati (adjacent)", meta:{dist:"up to 8 km",time:"flexible",diff:"Easy, flat",kind:"Day"},
+  why:"Dunes, wetlands and the same coastline at zero altitude — the family and wet-weather sibling.", safety:"—", src:{t:"Greater Wellington — Queen Elizabeth Park",u:"https://www.gw.govt.nz/queen-elizabeth-park"}, status:"Open"},
+ {rank:"2 · Best quieter option", name:"Whareroa Farm Recreation Reserve", loc:"MacKays Crossing (5 min)", meta:{dist:"2–10 km loops",time:"1–3 hr",diff:"Easy–moderate",kind:"Day"},
+  why:"Rolling farm-park ridgelines with the same Kāpiti views and a tenth of the walkers.", safety:"—", src:{t:"DOC — Whareroa Farm",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/whareroa-farm/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best special-trip option", name:"Kāpiti Island Nature Reserve", loc:"Boat from Paraparaumu", meta:{dist:"to 521 m summit",time:"day trip",diff:"Moderate",kind:"Day (booked)"},
+  why:"The island you’ve been staring at all walk — predator-free birdlife and the Tuteremoana summit.", safety:"Licensed ferry + DOC-managed visits; book ahead.", src:{t:"DOC — Kāpiti Island",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/kapiti-island-nature-reserve/"}, status:"Open — bookings required"},
+ {rank:"4 · Best harder option", name:"Rangituhi / Colonial Knob Walkway", loc:"Porirua (15 min south)", meta:{dist:"~7.5 km loop",time:"3 hr",diff:"Moderate+",kind:"Day"},
+  why:"A 468 m viewpoint over the whole harbour and strait — more climb, fewer stairs.", safety:"Exposed tops in wind.", src:{t:"Porirua City — Rangituhi",u:"https://poriruacity.govt.nz"}, status:"Open (check council)"}],
+sources:[
+ ["Herenga ā Nuku (Outdoor Access Commission) — Escarpment Track fact sheet, PDF (10.3 km, medium)","https://www.herengaanuku.govt.nz/track/escarpment-track/pdf"],
+ ["WellingtonNZ — Paekākāriki Escarpment Track","https://www.wellingtonnz.com/visit/trails/escarpment-track"],
+ ["Te Araroa Trust — trail status & notices","https://www.teararoa.org.nz"],
+ ["Metlink — Kāpiti Line timetable","https://www.metlink.org.nz"],
+ ["MetService — Kāpiti Coast forecast","https://www.metservice.com/towns-cities/locations/paraparaumu"]],
+route:{caption:"Schematic: Pukerua Bay → escarpment benches & stairs → Paekākāriki. Approximate.",
+ path:[[16,104],[30,98],[44,90],[58,80],[70,68],[82,58],[94,50],[108,44],[122,40],[136,38],[152,34],[168,28],[182,22]],
+ pois:[[0,"TH","Pukerua Bay Station"],[2,"JCT","Farm/road section ends — track proper"],[4,"HAZ","Narrow benches, drop-offs"],[5,"VIEW","First swing bridge"],[7,"VIEW","High point ~220 m — Kāpiti Island"],[9,"HAZ","1,200-step descent"],[10,"VIEW","Second swing bridge"],[12,"TH","Paekākāriki Station · cafés"]],
+ terrain:"coast"},
+elev:[[0,20],[1,45],[2,120],[3,180],[4,220],[5,185],[6,205],[7,150],[8,90],[9,45],[10,10]],
+elevNote:"South-to-north profile, approximate.",
+pull:"Trains shrink to toy scale below while Kāpiti Island rides the strait like a sleeping taniwha."
+},
+
+/* ---------- 8 DELIVERANCE COVE ---------- */
+{
+id:"deliverance", num:"08", name:"Deliverance Cove Track", short:"Deliverance Cove",
+region:"wairarapa", lat:-40.90, lon:176.22,
+town:"Castlepoint (Masterton ~1 hr)", townPin:{name:"Masterton", lat:-40.95, lon:175.657},
+tagline:"Limestone, fur seals and a lighthouse-guarded reef on the wild Wairarapa coast — currently an out-and-back while a slip heals.",
+type:"Loop (currently return only)", overnight:false, durationH:2, distKm:4,
+stats:{dist:"~4 km rtn", time:"~1.5 hr", gain:"~150 m", high:"162 m (Castle Rock)"},
+status:{level:"part", label:"Partially open — no loop",
+ text:"The loop cannot currently be completed: the section from the south end of the beach to the base of Castle Rock is closed by a large slip with ongoing movement risk (signs in place). The track is open from the car park to the base of Castle Rock as an out-and-back. Early 2026 also saw short closures for staged removal of exotic pines — check DOC alerts before travelling."},
+essentials:{
+ trailhead:"Castlepoint Scenic Reserve car park, Castlepoint village — about 1 hr (65 km) east of Masterton via Te Ore Ore–Castlepoint Road.",
+ surface:"Sandy beach, formed track through pine/scrub, exposed limestone slopes near Castle Rock.",
+ seasons:"All year; big easterly swells are the main constraint. Summer for swimming, winter for drama.",
+ exposure:"Fully coastal — wind, salt spray, sun. The reef and lagoon edge are dangerous in any swell.",
+ fitness:"Easy–moderate; families do this at low tide happily.",
+ kids:"Yes — but keep them off the reef edge and clear of seals (give 20 m+).",
+ dogs:"Wildlife (seals, nesting birds) — check DOC/reserve signage for current dog rules before bringing one (unverified at last check).",
+ mobile:"OK in the village; patchy around the rock.",
+ water:"None on track; shop/toilets in the village.",
+ emergency:"Short track close to the settlement. Rogue waves are the real hazard — never turn your back on the sea near the reef."},
+like:[
+ "Castlepoint is the Wairarapa coast at full theatre: a 162 m limestone castle, a mile-long reef with a 1913 lighthouse on its northern horn, and a lagoon the colour of pounamu between them. Deliverance Cove — named for a ship that sheltered here — hides behind Castle Rock, its swell-carved cliffs full of fossil shell beds.",
+ "New Zealand fur seals / kekeno haul out where the track meets the beach (give them space, especially pups), and on a southerly-swell day the whole reef smokes with spray. With the slip closing the loop’s seaward leg, walk in and back the same way — the cove and the rock’s base still deliver the goods."],
+features:{crowds:"Quiet outside summer holidays; Castlepoint village swells in January.",
+ photos:"Lighthouse over the lagoon from the cove track; Castle Rock reflected at low tide; seals on the haul-out (long lens, 20 m+).",
+ sun:"Sunrise is the event here — the light comes straight off the Pacific onto the rock and lighthouse."},
+options:[
+ {tag:"Recommended (current conditions)", name:"Car park → Deliverance Cove → Castle Rock base, return", dir:"Return", meta:{dist:"~4 km",time:"~1.5 hr",diff:"Easy–moderate"},
+  why:"Everything the loop offered except the closed connector; the cove viewpoint and rock base remain open.", needs:"Respect closure signage at the slip."},
+ {tag:"Pair it with", name:"Castle Point Lighthouse Walk", dir:"Return, from the same village", meta:{dist:"~1.5 km",time:"30–45 min",diff:"Easy"},
+  why:"The reef-top boardwalk to the lighthouse is the other half of any Castlepoint visit.", needs:"Not in big swell — waves sweep the reef."},
+ {tag:"When reopened", name:"Full Deliverance Cove loop over Castle Rock’s flank", dir:"Loop", meta:{dist:"~5 km",time:"1.5–2 hr",diff:"Moderate"},
+  why:"The classic circuit — watch DOC alerts for the slip section reopening.", needs:"Patience; geology is in charge."}],
+itinerary:{title:"Suggested visit — times approximate",
+ rows:[["06:30","Sunrise from the lighthouse boardwalk (summer)"],["08:00","Breakfast at the village store"],["09:00","Deliverance Cove track — beach leg at lowish tide"],["10:00","Castle Rock base viewpoint; seal-watching (from distance)"],["11:00","Back at the car; swim in the lagoon if it’s flat"]]},
+gear:{groups:[
+ ["Essentials",["Windproof shell","Sunhat + sunscreen — zero shade","Water bottle","Sturdy sneakers fine in summer"]],
+ ["Coast sense",["Check tide times (beach leg is nicer low)","Never turn your back on the reef sea","20 m+ from seals, more from pups"]],
+ ["Photography",["Long lens for seals & lighthouse compression","ND filter for smoothing swell at dawn"]]],
+ warn:"The reef by the lagoon is extremely dangerous in swell — rogue and tidal waves have swept people off. Admire it from the marked tracks."},
+accom:[
+ ["Castlepoint village","Holiday park, store-adjacent motels/baches.","Book summer holidays"],
+ ["Riversdale Beach (30 min)","Baches and a golf-side camp.","Seasonal"],
+ ["Masterton (1 hr)","Full motel/hotel range; supermarkets for supplies.","Usually available"]],
+costs:[
+ ["Track & parking","Free","16 Jul 2026"],
+ ["Castlepoint Holiday Park (powered site, 2 pp)","~$50–60 typical — verify with park","16 Jul 2026 · unverified"],
+ ["No bookings required for the track","—","—"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Castle Point Lighthouse Walk", loc:"Same car park", meta:{dist:"~1.5 km return",time:"30–45 min",diff:"Easy",kind:"Day"},
+  why:"The other Castlepoint essential — reef-top boardwalk to the 1913 light; do both in a morning.", safety:"Stay off the reef in swell.", src:{t:"DOC — Castlepoint Scenic Reserve",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wairarapa/places/castlepoint-scenic-reserve/"}, status:"Open (check alerts)"},
+ {rank:"2 · Best geology option", name:"Putangirua Pinnacles Track", loc:"Cape Palliser Rd (~2 hr drive)", meta:{dist:"~4 km return",time:"1.5–2 hr",diff:"Easy–moderate (streambed)",kind:"Day"},
+  why:"Hoodoo ‘organ pipes’ badlands — the Paths of the Dead from LOTR; pairs with the Palliser seal colony.", safety:"Rockfall under the pinnacles; avoid after heavy rain.", src:{t:"DOC — Putangirua Pinnacles",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wairarapa/places/putangirua-pinnacles-scenic-reserve/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best wildlife option", name:"Cape Palliser lighthouse & seal colony", loc:"Cape Palliser (~2.5 hr)", meta:{dist:"250 steps + colony strolls",time:"1–2 hr",diff:"Easy",kind:"Day"},
+  why:"The North Island’s largest fur-seal colony and a 250-step lighthouse staircase.", safety:"Seals on the road — give way and distance.", src:{t:"DOC — Cape Palliser area",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wairarapa/"}, status:"Open"},
+ {rank:"4 · Best bush/wet-weather option", name:"Fensham Reserve", loc:"Carterton (50 min)", meta:{dist:"~3 km loops",time:"1–1.5 hr",diff:"Easy",kind:"Day"},
+  why:"Sheltered kahikatea and tawa forest loops when the coast is being blasted.", safety:"—", src:{t:"Forest & Bird — Fensham Reserve",u:"https://www.forestandbird.org.nz"}, status:"Open"}],
+sources:[
+ ["DOC — Deliverance Cove Track (incl. slip closure alert)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wairarapa/places/castlepoint-scenic-reserve/things-to-do/deliverance-cove-track/"],
+ ["DOC — Castlepoint Scenic Reserve (alerts incl. 2026 pine removal)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wairarapa/places/castlepoint-scenic-reserve/"],
+ ["Destination Wairarapa — Deliverance Cove","https://wairarapanz.com/products/deliverance-cove"],
+ ["MetService — Wairarapa coast forecast","https://www.metservice.com/rural/regions/wairarapa"]],
+route:{caption:"Schematic. Red dashes = slip-closed loop section (do not enter). Approximate.",
+ path:[[36,28],[48,40],[56,54],[60,68],[66,82],[76,92],[90,98],[104,100]],
+ closed:[[104,100],[120,96],[134,86],[142,72],[138,56],[126,44],[110,38],[92,34],[70,30],[48,28],[36,28]],
+ pois:[[0,"TH","Castlepoint Scenic Reserve car park"],[2,"VIEW","Lagoon & lighthouse view"],[4,"HAZ","Seal haul-out — keep 20 m+"],[5,"VIEW","Deliverance Cove"],[7,"VIEW","Castle Rock base (162 m) — turn around"],[-1,"HAZ","Slip closure — loop section shut"]],
+ terrain:"coast"},
+elev:[[0,5],[0.4,45],[0.8,75],[1.2,35],[1.6,60],[2,90]],
+elevNote:"Out-and-back profile to the rock base, approximate.",
+pull:"“The reef by the lagoon should be avoided… Beware of tidal and rogue waves.” — Department of Conservation"
+},
+
+/* ---------- 9 WAIRERE FALLS ---------- */
+{
+id:"wairere", num:"09", name:"Wairere Falls Track", short:"Wairere Falls",
+region:"waikatobop", lat:-37.755, lon:175.855,
+town:"Matamata (20 min) / Te Aroha", townPin:{name:"Matamata", lat:-37.81, lon:175.775},
+tagline:"The North Island’s tallest waterfall — a 153 m double leap off the Kaimai escarpment. Main track currently closed by rockfall; the lower valley walk remains.",
+type:"Return", overnight:false, durationH:3, distKm:5,
+stats:{dist:"~5 km rtn†", time:"3–4 hr†", gain:"~420 m†", high:"~500 m†"},
+statNote:"†Figures for the full track when open. Currently only the short lower section is walkable.",
+status:{level:"closed", label:"Main track closed",
+ text:"Closed beyond the lower section since 13 July 2025 due to severe rockfall hazard — geotechnical work and track upgrades (new bridge, lookouts, steps) are underway with mana whenua Ngāti Hauā, Ngāti Hinerangi and Raukawa. DOC has signalled the closure runs well into 2026; no reopening date had been announced at last check (16 Jul 2026). The short lower riverside walk to the International Seat of Peace remains open. Do not pass closure barriers — a 3 m boulder above the stairs is expected to release."},
+essentials:{
+ trailhead:"Goodwin Road car park, off Te Aroha–Okauia Road (south of Te Aroha, ~20 min from Matamata).",
+ surface:"(When open) Boulder-hopping boardwalks through mossy gorge forest, then a long staircase to the lookout; steep and rough above.",
+ seasons:"(When open) All year — but the gorge is explicitly not to be used during or after heavy rain due to rockfall and slippery boulders.",
+ exposure:"Sheltered gorge below; exposed escarpment edge at the upper lookout.",
+ fitness:"Moderate for the lower lookout; solid fitness for the top.",
+ kids:"Lower section is family-friendly; keep back from drops.",
+ dogs:"Check DOC page for current dog rules (conservation land, kiwi programmes in the Kaimai) — unverified at last check.",
+ mobile:"Reasonable near the plains; patchy in the gorge.",
+ water:"Stream water (treat); café-level civilisation is 20 min away in Matamata.",
+ emergency:"With the closure, the walkable section is short and low-risk in fair weather; heed all signage."},
+like:[
+ "Wairere Falls throws the Waihou headwaters 153 metres off the Kaimai fault scarp in two clean leaps — you can see it shining from the Hauraki Plains kilometres away. The full track (when open) is one of Waikato’s best short-hard walks: a mossy boulder gorge, a heroic staircase, a lookout straight into the falls’ throat, then swamp-forest flats to the top platform where the stream simply steps off the edge.",
+ "Right now the mountain is renegotiating the route: rockfall activity closed the track in July 2025, and DOC’s engineers and iwi partners are rebuilding bridges, lookouts and stairs. The lower riverside stroll — including the International Seat of Peace bench — stays open and makes a pleasant leg-stretch, but the falls themselves must currently be admired from the plains."],
+features:{crowds:"(Pre-closure) one of the region’s busiest tracks; currently very quiet.",
+ photos:"The falls from Goodwin Rd/plains viewpoints (telephoto); moss-and-boulder river scenes on the open lower section.",
+ sun:"West-facing scarp — afternoon light hits the falls face."},
+options:[
+ {tag:"Currently available", name:"Lower valley walk to the International Seat of Peace", dir:"Return", meta:{dist:"~1.5 km",time:"30–45 min",diff:"Easy"},
+  why:"The open portion: riverside forest and big-boulder scenery. Respect the closure barrier.", needs:"—"},
+ {tag:"When reopened · classic", name:"Full track to the falls lookout", dir:"Return", meta:{dist:"~3.4 km rtn",time:"1.5–2 hr",diff:"Moderate (45 min up)"},
+  why:"The stairway to the mid-lookout facing the falls — the signature view.", needs:"Watch DOC alerts for reopening; avoid during/after heavy rain."},
+ {tag:"When reopened · full climb", name:"Top of the falls platform", dir:"Return", meta:{dist:"~5 km rtn",time:"3–4 hr",diff:"Moderate–hard (further 90 min)"},
+  why:"Stand where the water leaves the edge, with the Hauraki Plains chequered below.", needs:"Steep and rough; steady footing."}],
+itinerary:{title:"While the closure lasts — a Kaimai day, times approximate",
+ rows:[["09:00","Lower Wairere section + Seat of Peace (45 min)"],["10:30","Drive to Karangahake Gorge (45 min)"],["11:15","Windows Walk + Rail Tunnel loop"],["13:00","Café lunch, Paeroa or Waihī"],["14:30","Optional: Te Aroha Domain & Whakapipi Lookout"]]},
+gear:{groups:[
+ ["Essentials (lower walk)",["Sneakers or light boots","Rain shell","Water bottle","Insect repellent in summer"]],
+ ["When the full track reopens",["Proper footwear — wet rock & stairs","1 L water pp","Layers for the exposed top","Do not go in/after heavy rain (rockfall)"]]],
+ warn:"Do not cross closure barriers. DOC describes a 3 m boulder poised above the staircase — “when it goes, it’s likely to take out the stairs and anyone on them.”"},
+accom:[
+ ["Matamata (20 min)","Motels, holiday park; Hobbiton crowds book things out in summer.","Book ahead"],
+ ["Te Aroha (25 min)","Historic spa town — hotel, holiday park, mineral pools for post-walk soaking.","Usually available"],
+ ["Okauia hot pools (10 min)","Opal Hot Springs holiday park adjacent.","Usually available"]],
+costs:[
+ ["Track & parking","Free","16 Jul 2026"],
+ ["Te Aroha Mineral Spas (post-walk soak)","from ~$20–40 pp — verify with spa","16 Jul 2026 · unverified"],
+ ["No bookings required","—","—"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Karangahake Gorge — Windows Walk", loc:"Karangahake (45 min)", meta:{dist:"~2.5 km loop",time:"1–1.5 hr",diff:"Easy",kind:"Day"},
+  why:"Gold-mine tunnels ‘windowed’ into a river gorge — the region’s best wet-weather-tolerant walk and the natural stand-in while Wairere is shut.", safety:"Take a torch for tunnels.", src:{t:"DOC — Karangahake Windows Walk",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/bay-of-plenty/places/kaimai-mamaku-conservation-park/things-to-do/tracks/karangahake-windows-walk/"}, status:"Open (check alerts)"},
+ {rank:"2 · Best harder option", name:"Te Aroha Mountain — Whakapipi (Bald Spur) Lookout or summit", loc:"Te Aroha Domain (25 min)", meta:{dist:"Whakapipi ~2.8 km rtn · summit ~7 km rtn",time:"1.5 hr / 4–5 hr",diff:"Moderate / hard",kind:"Day"},
+  why:"The same Kaimai range from its 952 m high point — plains views that rival Wairere’s top platform.", safety:"Summit track is steep and rooty; weather on top.", src:{t:"DOC — Te Aroha Summit Track",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/bay-of-plenty/places/kaimai-mamaku-conservation-park/things-to-do/tracks/te-aroha-summit-track/"}, status:"Open (check alerts)"},
+ {rank:"3 · Best flat/family option", name:"Te Waihou Walkway (Blue Spring)", loc:"Putāruru (35 min)", meta:{dist:"~9.4 km return (short option 30 min)",time:"up to 3 hr",diff:"Easy",kind:"Day"},
+  why:"Impossibly clear spring water over emerald weed — a boardwalk classic in any weather.", safety:"No swimming — source-water protection.", src:{t:"South Waikato DC — Te Waihou",u:"https://www.southwaikato.govt.nz"}, status:"Open (check council)"},
+ {rank:"4 · Best waterfall stand-in", name:"Wairēinga / Bridal Veil Falls", loc:"Raglan side (~1.5 hr)", meta:{dist:"short lookout walks",time:"30–60 min",diff:"Easy",kind:"Day"},
+  why:"A 55 m plunge with viewing decks top and bottom — waterfall fix guaranteed.", safety:"—", src:{t:"DOC — Waireinga/Bridal Veil Falls",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/waikato/places/raglan-area/tracks/waireinga-bridal-veil-falls/"}, status:"Open (check alerts)"}],
+sources:[
+ ["DOC — Wairere Falls Track (official page & warnings)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/bay-of-plenty/places/kaimai-mamaku-conservation-park/things-to-do/tracks/wairere-falls-track/"],
+ ["DOC media release — “Wairere Falls between a rock and a good place” (26 Nov 2025: closure into 2026)","https://www.doc.govt.nz/news/media-releases/2025-media-releases/wairere-falls-between-a-rock-and-a-good-place/"],
+ ["NZ Herald — closure through summer for safety upgrades","https://www.nzherald.co.nz/waikato-news/news/waikato-wairere-falls-track-to-stay-closed-through-summer-for-safety-upgrades/DYMLW5WRWVAJ7P7F7CKUKHNNUU/"],
+ ["MetService — Waikato forecast","https://www.metservice.com/regions/waikato"]],
+route:{caption:"Schematic. Red dashes = closed upper track (rockfall). Approximate.",
+ path:[[20,100],[36,94],[50,88],[62,84]],
+ closed:[[62,84],[74,76],[84,64],[92,50],[102,40],[116,32],[132,28],[148,26]],
+ pois:[[0,"TH","Goodwin Rd car park"],[2,"VIEW","International Seat of Peace"],[3,"HAZ","CLOSURE BARRIER — do not pass"],[-1,"HAZ","Rockfall zone & staircase (closed)"],[-2,"VIEW","Falls lookout (closed)"],[-3,"VIEW","Top platform (closed)"]],
+ terrain:"scarp"},
+elev:[[0,80],[0.4,110],[0.75,140],[1.1,250],[1.7,370],[2.3,470],[2.6,495]],
+elevNote:"One-way profile of the full track (currently walkable to ~0.75 km), approximate.",
+pull:"“One particularly large boulder, three metres wide, is set to break loose at any time.” — DOC media release, Nov 2025"
+},
+
+/* ---------- 10 POWELL HUT ---------- */
+{
+id:"powell", num:"10", name:"Powell Hut (Mt Holdsworth)", short:"Powell Hut",
+region:"wairarapa", lat:-40.865, lon:175.44,
+town:"Masterton (25 min to road end)", townPin:{name:"Masterton", lat:-40.95, lon:175.657},
+tagline:"The Tararuas’ most comfortable bunk: a bookable 32-bunk hut perched at the bushline, one hour below Mt Holdsworth’s 1,470 m summit.",
+type:"Return · overnight tramp", overnight:true, durationH:9, distKm:15,
+stats:{dist:"~15 km rtn", time:"~4 hr up", gain:"~800 m", high:"1,470 m"},
+status:{level:"open", label:"Open — booking required",
+ text:"No track alerts found at last check. Powell Hut requires booking year-round (no walk-in spaces kept; same-day online bookings until 8 pm if space remains). The summit section above the hut experiences frequent strong winds, thick mist and freezing temperatures — treat it as alpine in any season."},
+essentials:{
+ trailhead:"Holdsworth road end: turn off SH2 onto Norfolk Road 2 km south of Masterton, follow to Mount Holdsworth Road — 15 km from the highway. Big car park, shelter, campsite.",
+ surface:"The famously friendly ‘Gentle Annie’ benched grade to Rocky Lookout and Mountain House shelter, then steeper beech-forest climbing and a big staircase to the hut; alpine tussock ridge to the summit.",
+ seasons:"All year for the hut with care; the summit ridge is winter-alpine May–October.",
+ exposure:"Sheltered forest for two-thirds; fully exposed from the hut upward.",
+ fitness:"Good fitness with an overnight pack — DOC allows about 4 hr up.",
+ kids:"A favourite first ‘real hut’ trip for tramping families with fit kids 8+.",
+ dogs:"No dogs without a DOC permit (forest park) — confirm with DOC Wairarapa.",
+ mobile:"Surprisingly OK near the hut/ridge; dead in the valley.",
+ water:"Rainwater tanks at Mountain House and Powell; treat before drinking.",
+ emergency:"Mountain House shelter is the mid-way refuge; below the bushline the track is all-weather. Do not attempt the summit in mist/wind — it will still be there tomorrow."},
+like:[
+ "If Kime is the Tararuas’ hard lesson, Powell is its welcome mat. The Gentle Annie track earns its name — a steady, beautifully benched climb through rimu and beech, past Rocky Lookout’s first big view of the valley, to Mountain House shelter. Then the range shows its teeth: a steeper hour of roots and the great staircase to the bushline.",
+ "The hut itself — rebuilt 2019 after its predecessor burned — is the range’s glamour address: 32 bunks, gas cooking in season, a log burner, and a deck that looks over the entire Wairarapa plain to the coast. Sunrise from the deck, or an hour higher on Holdsworth’s 1,470 m summit dome, is the east coast’s answer to any Great Walk moment."],
+features:{crowds:"Weekends book out fast, especially summer and school holidays; midweek is peaceful.",
+ photos:"Dawn over the Wairarapa plain from the hut deck; the summit trig against the Broken Axe Pinnacles; beech forest mist on the climb.",
+ sun:"East-facing — sunrise is the show. Summit early, before the wind builds."},
+options:[
+ {tag:"Recommended · most popular", name:"Road end → Powell Hut overnight → summit at dawn", dir:"Return", meta:{dist:"~15 km rtn",time:"~4 hr up + 1 hr summit",elev:"+800 m (+270 m summit)",diff:"Advanced"},
+  why:"The classic east-Tararua overnight, with the summit saved for morning stillness.", needs:"Hut booking (year-round); alpine kit in winter."},
+ {tag:"Fit day trip", name:"Summit day walk", dir:"Return", meta:{dist:"~17 km",time:"7–8 hr",diff:"Advanced day"},
+  why:"Strong walkers do Holdsworth in a day — the hut makes a luxurious lunch stop.", needs:"Early start; turnaround discipline."},
+ {tag:"Easiest · family", name:"Rocky Lookout return", dir:"Return", meta:{dist:"~5 km",time:"1.5–2 hr",diff:"Easy–moderate"},
+  why:"The best view-per-effort on the Gentle Annie; ideal with younger kids.", needs:"—"},
+ {tag:"Advanced circuit", name:"Powell → Holdsworth → Jumbo → Atiwhakatu (Jumbo–Holdsworth circuit)", dir:"Loop, 2 days (fit parties)", meta:{dist:"~24 km",time:"2 days (or a famous hard day)",diff:"Advanced–expert"},
+  why:"The east Tararua grand tour along the tops via Jumbo Hut, descending to the Atiwhakatu valley.", needs:"Stable forecast — the tops section is committing; book Powell/Jumbo."},
+ {tag:"Bad-weather alternative", name:"Atiwhakatu Hut valley route", dir:"Return", meta:{dist:"~11 km rtn",time:"3 hr up",diff:"Easy–moderate"},
+  why:"River-valley track to a snug 26-bunk hut, almost all below the weather.", needs:"Standard hut fees; no booking."}],
+itinerary:{title:"Suggested 2-day — times approximate",
+ rows:[["Day 1 · 10:00","Holdsworth road end — sign intentions, Gentle Annie begins"],["11:15","Rocky Lookout — first plains view"],["12:30","Mountain House shelter — lunch, water"],["14:30","Powell Hut — claim a bunk, deck time"],["17:30","Optional evening leg-stretch toward the summit ridge"],["Day 2 · 06:00","Summit for sunrise (1 hr up) in good weather"],["09:00","Breakfast, descend"],["12:30","Road end — Masterton pie by 13:00"],["Turnaround","Wind you can’t walk straight in at the bushline = no summit today."]]},
+gear:{groups:[
+ ["Essential tramping kit",["Storm shell + overtrousers","Warm layers, hat, gloves","Boots","2 L water pp","Meals + emergency food","First aid, survival bag, headtorch"]],
+ ["Winter/alpine (May–Oct)",["Ice axe/crampons for the summit ridge","Insulated jacket","Navigation for mist on the dome"]],
+ ["Hut kit",["Booking confirmation","Sleeping bag & mat","Stove + pot (gas rings seasonal — bring backup)","Earplugs (32 bunks)","Cash-free: all booked online"]],
+ ["Photography",["Wide lens for the deck dawn","Warm gloves you can shoot in"]]],
+ warn:"“Frequent strong winds, thick mist and freezing temperatures” is DOC’s own description of the hut-to-summit section — in bad weather the summit is a trap, not a tick."},
+accom:[
+ ["Powell Hut (on track)","32 bunks, serviced: log burner, seasonal gas cooking, water, long-drops.","Booking required year-round — from $25/adult"],
+ ["Atiwhakatu Hut (valley)","26 bunks, standard hut in the neighbouring valley.","Standard fees, no booking"],
+ ["Holdsworth road-end campsite (DOC)","Grassy family campsite with shelter and toilets.","Standard DOC campsite fees — check current rate"],
+ ["Masterton (25 min)","Motels, hotels, supermarkets.","Usually available"]],
+costs:[
+ ["Powell Hut — adult","$25 (May–Sep) / $28–32 (Oct–Apr) / $29–34 (Dec–Feb) per night","16 Jul 2026 · DOC rates from 1 Jul 2026"],
+ ["Powell Hut — youth 5–17","from $12.50","16 Jul 2026"],
+ ["Booking service fee (phone/in-person only)","$10 — free online","16 Jul 2026"],
+ ["Parking (road end)","Free","16 Jul 2026"]],
+alternatives:[
+ {rank:"1 · Most popular alternative", name:"Atiwhakatu Hut", loc:"Same road end", meta:{dist:"~11 km rtn",time:"3 hr up",diff:"Easy–moderate",kind:"Overnight"},
+  why:"The all-weather overnight from the same car park — river valley, no bushline exposure, no booking needed.", safety:"Stream sections after heavy rain.", src:{t:"DOC — Atiwhakatu Hut",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/atiwhakatu-hut/"}, status:"Open"},
+ {rank:"2 · Best shorter option", name:"Rocky Lookout return", loc:"Same track, lower", meta:{dist:"~5 km rtn",time:"1.5–2 hr",diff:"Easy–moderate",kind:"Day"},
+  why:"Gentle Annie’s best viewpoint without the grunt above Mountain House.", safety:"—", src:{t:"DOC — Holdsworth area tracks",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/tracks/holdsworth-roadend-to-powell-hut-mount-holdsworth/"}, status:"Open"},
+ {rank:"3 · Best advanced option", name:"Jumbo–Holdsworth Circuit", loc:"Same road end", meta:{dist:"~24 km",time:"2 days",diff:"Advanced–expert",kind:"Overnight"},
+  why:"The tops traverse past the Broken Axe Pinnacles — the east Tararua test-piece.", safety:"Committing alpine ridge; stable forecast only.", src:{t:"DOC — Tararua Forest Park",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/"}, status:"Open — alpine conditions"},
+ {rank:"4 · Best family/wet option", name:"Donnelly Flat loop", loc:"Same road end", meta:{dist:"~2 km",time:"40–60 min",diff:"Easy",kind:"Day"},
+  why:"Riverside picnic loop under big rimu — the rainy-day and toddler option.", safety:"—", src:{t:"DOC — Holdsworth area",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/"}, status:"Open"},
+ {rank:"5 · Featured sibling", name:"Kime Hut via Field Hut", loc:"Western Tararua (Ōtaki Forks)", meta:{dist:"~27 km rtn",time:"2 days",diff:"Advanced",kind:"Overnight"},
+  why:"The wilder, colder western twin — featured in full above.", safety:"Access detour; unheated hut.", src:{t:"DOC — Kime Hut",u:"https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/kime-hut/"}, status:"Open — access detour"}],
+sources:[
+ ["DOC — Powell Hut (32 bunks, booking, fees)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/huts/powell-hut/"],
+ ["DOC — Holdsworth road end to Powell Hut / Mount Holdsworth (track page)","https://www.doc.govt.nz/parks-and-recreation/places-to-go/wellington-kapiti/places/tararua-forest-park/things-to-do/tracks/holdsworth-roadend-to-powell-hut-mount-holdsworth/"],
+ ["DOC bookings portal","https://bookings.doc.govt.nz"],
+ ["MetService — Tararua Forest Park forecast","https://www.metservice.com/outdoor/parks/tararua-forest-park"]],
+route:{caption:"Schematic: Gentle Annie → Mountain House → Powell Hut → summit. Approximate — Topo50 BP34.",
+ path:[[14,102],[30,96],[46,92],[60,86],[74,80],[88,72],[102,64],[114,54],[126,44],[138,34],[152,26],[164,20]],
+ pois:[[0,"TH","Holdsworth road end · campsite, intentions book"],[1,"WTR","Atiwhakatu Stream (treat)"],[3,"VIEW","Rocky Lookout"],[5,"HUT","Mountain House shelter"],[5,"JCT","Atiwhakatu valley junction"],[7,"HAZ","Staircase to bushline"],[9,"HUT","Powell Hut · 32 bunks, book"],[9,"TOILET","Hut long-drops"],[11,"VIEW","Mt Holdsworth summit 1,470 m"]],
+ terrain:"range"},
+elev:[[0,400],[1,455],[2.5,565],[4,705],[5,860],[6,1010],[7,1150],[7.4,1200],[8.4,1470]],
+elevNote:"One-way profile including summit, approximate.",
+pull:"Sunrise from the hut deck sweeps the whole Wairarapa plain to the Pacific — the east coast’s answer to any Great Walk moment."
+}
+];
+const DIFFKEY={tongariro:"alp","dukes-nose":"adv",pouakai:"mod",kime:"alp",tama:"mod",mercer:"easy",escarpment:"mod",deliverance:"easy",wairere:"mod",powell:"adv"};
+const TYPEKEY={tongariro:"point","dukes-nose":"return",pouakai:"return",kime:"overnight",tama:"return",mercer:"loop",escarpment:"point",deliverance:"return",wairere:"return",powell:"overnight"};
+const BUDGET_DEF={
+ tongariro:{km:340,shuttle:55,hut:0,camp:15,hire:"alpine"},
+ "dukes-nose":{km:520,shuttle:50,hut:28,camp:0,hire:"basic"},
+ pouakai:{km:360,shuttle:0,hut:25,camp:0,hire:"basic"},
+ kime:{km:150,shuttle:0,hut:15,camp:0,hire:"alpine"},
+ tama:{km:340,shuttle:0,hut:0,camp:15,hire:"basic"},
+ mercer:{km:80,shuttle:0,hut:0,camp:0,hire:"0"},
+ escarpment:{km:100,shuttle:8,hut:0,camp:0,hire:"0"},
+ deliverance:{km:180,shuttle:0,hut:0,camp:0,hire:"0"},
+ wairere:{km:160,shuttle:0,hut:0,camp:0,hire:"0"},
+ powell:{km:140,shuttle:0,hut:28,camp:15,hire:"basic"}};
+const CMP_EXTRA={
+ tongariro:{alpine:"High",hut:"No (circuit huts nearby)",camp:"Nearby (Mangahuia)",cost:"$45–60 shuttle",season:"Nov–Apr",light:"Red Crater & Emerald Lakes",pop:"Very high"},
+ "dukes-nose":{alpine:"None (exposed rock)",hut:"Lane Cove (book)",camp:"No",cost:"$0–28 hut",season:"Dry spells, summer",light:"Whangaroa summit panorama",pop:"Moderate"},
+ pouakai:{alpine:"Moderate (winter ice)",hut:"Pouākai (book)",camp:"No",cost:"$0–25 hut",season:"Calm clear mornings",light:"Taranaki tarn reflection",pop:"High"},
+ kime:{alpine:"High",hut:"Kime & Field (no booking)",camp:"No",cost:"$15 hut",season:"Nov–Apr",light:"Tararua tops & 1924 Field Hut",pop:"Low–moderate"},
+ tama:{alpine:"Moderate–high",hut:"No",camp:"Nearby",cost:"Free",season:"Oct–May",light:"Crater lakes between volcanoes",pop:"Moderate"},
+ mercer:{alpine:"None",hut:"No",camp:"Piha nearby",cost:"Free",season:"All year (sunset!)",light:"220 m sea cliffs",pop:"High"},
+ escarpment:{alpine:"None",hut:"No",camp:"No",cost:"Train fare",season:"All year",light:"Kāpiti views, swing bridges",pop:"High"},
+ deliverance:{alpine:"None",hut:"No",camp:"Village holiday park",cost:"Free",season:"All year, low swell",light:"Lighthouse, seals, limestone",pop:"Moderate"},
+ wairere:{alpine:"None",hut:"No",camp:"Okauia nearby",cost:"Free",season:"When reopened; dry weather",light:"153 m falls (NI’s tallest)",pop:"Very high (pre-closure)"},
+ powell:{alpine:"High above hut",hut:"Powell 32 bunks (book)",camp:"Road-end campsite",cost:"$25–34 hut",season:"All year (hut); summit Nov–Apr",light:"Bushline hut, 1,470 m summit",pop:"High"}};
+
+/* ==================== HELPERS ==================== */
+const $=(s,el)=>(el||document).querySelector(s), $$=(s,el)=>Array.from((el||document).querySelectorAll(s));
+const REDUCED=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function diffBadge(k){const d=DIFF[k];return `<span class="badge ${d.cls}">▲ ${d.label}</span>`}
+function statusBadge(st){const cls=st.level==="open"?"b-open":st.level==="part"?"b-part":"b-closed";const dot=st.level==="open"?"●":"◐";return `<span class="badge ${cls}">${dot} ${esc(st.label)}</span>`}
+
+/* ---- card art: layered ridge illustration per terrain ---- */
+function cardArt(t,seed){
+ const pal={volcano:["#7A4A33","#5C3826","#3E2A1E"],cone:["#4E7263","#3A5A4C","#27412F"],coast:["#3E6E7E","#2C5666","#1C3E4E"],harbour:["#3E7E6E","#2C6656","#1C4E3E"],range:["#5A6E58","#42563F","#2C4030"],scarp:["#6E6248","#544A34","#3A3422"]}[t];
+ const sky={volcano:"#E8C8A8",cone:"#CFE0D8",coast:"#F0D8B8",harbour:"#D8E8E0",range:"#D0D8E0",scarp:"#E8E0C8"}[t];
+ function ridge(y,amp,c,o){let d=`M0 ${y}`;for(let x=0;x<=300;x+=30){d+=` L${x} ${y-((Math.sin(x*.05+seed*7+o)+1)/2)*amp}`}d+=" L300 120 L0 120 Z";return `<path d="${d}" fill="${c}"/>`}
+ let extra="";
+ if(t==="volcano")extra=`<path d="M95 92 L150 30 L162 30 L215 92 Z" fill="${pal[2]}"/><path d="M150 30 L156 24 L162 30 L158 34 L154 34 Z" fill="#8C3B22"/>`;
+ if(t==="cone")extra=`<path d="M110 96 L160 22 L210 96 Z" fill="${pal[2]}"/><path d="M150 38 L160 22 L170 38 L160 33 Z" fill="#F4F2EC"/>`;
+ if(t==="coast")extra=`<rect x="0" y="96" width="300" height="24" fill="#2C5666"/><path d="M0 96 h300 v3 H0Z" fill="#EAE2CE" opacity=".8"/>`;
+ if(t==="harbour")extra=`<rect x="0" y="92" width="300" height="28" fill="#39707E"/><path d="M60 92 l14 -26 14 26Z M150 92 l18 -34 18 34Z M240 92 l12 -20 12 20Z" fill="${pal[2]}"/>`;
+ if(t==="scarp")extra=`<rect x="150" y="34" width="150" height="10" fill="${pal[2]}"/><path d="M196 44 l3 48 4 0 3 -48Z" fill="#D8E8F0" opacity=".9"/>`;
+ return `<svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect width="300" height="120" fill="${sky}"/>${ridge(78,34,pal[0],0)}${extra}${ridge(98,30,pal[1],2)}${ridge(114,22,pal[2],4)}</svg>`;
+}
+
+/* ==================== REAL MAPS (Leaflet) ==================== */
+const PHOTOS={
+ tongariro:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Emerald_Lakes%2C_NZ.jpg/1920px-Emerald_Lakes%2C_NZ.jpg",page:"https://commons.wikimedia.org/wiki/File:Emerald_Lakes,_NZ.jpg",credit:"Du Hugin Skulblaka",lic:"CC BY-SA 4.0",cap:"The Emerald Lakes (Ngā Rotopounamu) below Red Crater"},
+ tama:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Upper_Tama_Lake_%2853203574547%29.jpg/1920px-Upper_Tama_Lake_%2853203574547%29.jpg",page:"https://commons.wikimedia.org/wiki/File:Upper_Tama_Lake_(53203574547).jpg",credit:"Geoff McKay",lic:"CC BY 2.0",cap:"Upper Tama Lake from the Tama ridge"},
+ pouakai:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mount_Taranaki_-_Pouakai_Crossing_%283%29_%2852457203471%29.jpg/1920px-Mount_Taranaki_-_Pouakai_Crossing_%283%29_%2852457203471%29.jpg",page:"https://commons.wikimedia.org/wiki/File:Mount_Taranaki_-_Pouakai_Crossing_(3)_(52457203471).jpg",credit:"Geoff McKay",lic:"CC BY 2.0",cap:"Taranaki Maunga from the Pouākai tops"},
+ "dukes-nose":{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Whangaroa_Harbour.JPG/1920px-Whangaroa_Harbour.JPG",page:"https://commons.wikimedia.org/wiki/File:Whangaroa_Harbour.JPG",credit:"Gadfium",lic:"Public domain",cap:"Whangaroa Harbour — St Paul’s Rock above the township"},
+ kime:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Kime_Hut_00.jpg/1920px-Kime_Hut_00.jpg",page:"https://commons.wikimedia.org/wiki/File:Kime_Hut_00.jpg",credit:"Sarang",lic:"Public domain",cap:"Kime Hut in midsummer fog — typical Tararua weather"},
+ mercer:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Te_Ahua_Point_IMG_20140322_113803.jpg/1920px-Te_Ahua_Point_IMG_20140322_113803.jpg",page:"https://commons.wikimedia.org/wiki/File:Te_Ahua_Point_IMG_20140322_113803.jpg",credit:"Andrew Harvey",lic:"CC BY 2.0",cap:"Te Ahua Point and the cliff line south toward Whatipu"},
+ escarpment:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Paekakariki_Escarpment_Track_Swing_Bridge_%2831034011486%29.jpg/1920px-Paekakariki_Escarpment_Track_Swing_Bridge_%2831034011486%29.jpg",page:"https://commons.wikimedia.org/wiki/File:Paekakariki_Escarpment_Track_Swing_Bridge_(31034011486).jpg",credit:"Daniel Walker",lic:"CC BY-SA 2.0",cap:"One of the two swing bridges on the Escarpment Track"},
+ deliverance:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg/1920px-Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg",page:"https://commons.wikimedia.org/wiki/File:Deliverance_Cove_and_Castle_Rock_at_Castlepoint.jpg",credit:"Pseudopanax",lic:"Public domain",cap:"Deliverance Cove and Castle Rock, toetoe in flower"},
+ wairere:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Wairere_Falls_in_April_2010_and_May_2023.jpg/1920px-Wairere_Falls_in_April_2010_and_May_2023.jpg",page:"https://commons.wikimedia.org/wiki/File:Wairere_Falls_in_April_2010_and_May_2023.jpg",credit:"Johnragla",lic:"CC BY-SA 4.0",cap:"Wairere Falls at low and high flow (2010 / 2023)"},
+ powell:{src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/New_Zealand%2C_Tararua_Mountains_-_around_Mt._Holdsworth_%2810%29.jpg/1920px-New_Zealand%2C_Tararua_Mountains_-_around_Mt._Holdsworth_%2810%29.jpg",page:"https://commons.wikimedia.org/wiki/File:New_Zealand,_Tararua_Mountains_-_around_Mt._Holdsworth_(10).jpg",credit:"Michal Klajban",lic:"CC BY-SA 4.0",cap:"Between Powell Hut and the Holdsworth summit"}
+};
+const GEOSRC={};HIKES.forEach(h=>{GEOSRC[h.id]=["escarpment","mercer","deliverance"].includes(h.id)?"© OpenStreetMap contributors (ODbL)":"DOC Tracks open data (CC-BY 4.0)"});
+const TRACKS={},MARKERS={},MINIS={};
+let mainMap=null,selectedHike=null,driveLine=null;
+function makeBases(){return{
+ "Topo (OpenTopoMap)":L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | map style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}),
+ "Satellite (Esri)":L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}),
+ "Streets (OSM)":L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+}}
+function flatLatLngs(gj){
+ const segs=[];
+ (gj.features||[]).forEach(f=>{const g=f.geometry;if(!g)return;const lines=g.type==="LineString"?[g.coordinates]:g.coordinates;lines.forEach(l=>{if(l.length>1)segs.push(l.map(c=>[c[1],c[0]]))})});
+ if(!segs.length)return[];
+ const d2=(a,b)=>(a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]);
+ const chain=[segs.shift()];
+ while(segs.length){
+  const tail=chain[chain.length-1][chain[chain.length-1].length-1];
+  let bi=0,bflip=false,bd=Infinity;
+  segs.forEach((sg,i)=>{
+   const ds=d2(tail,sg[0]),de=d2(tail,sg[sg.length-1]);
+   if(ds<bd){bd=ds;bi=i;bflip=false}
+   if(de<bd){bd=de;bi=i;bflip=true}
+  });
+  const sg=segs.splice(bi,1)[0];
+  chain.push(bflip?sg.slice().reverse():sg);
+ }
+ return chain.flat();
+}
+async function loadTracks(){await Promise.all(HIKES.map(async h=>{try{const r=await fetch("assets/tracks/"+h.id+".geojson?v=2");if(r.ok)TRACKS[h.id]=await r.json()}catch(e){TRACKS[h.id]=null}}))}
+function hikeIcon(sel){return L.divIcon({className:"",html:'<div class="pinicon'+(sel?" sel":"")+'"></div>',iconSize:[18,18],iconAnchor:[9,9]})}
+function buildMap(){
+ const bases=makeBases();
+ mainMap=L.map("niMap").setView([-38.7,175.7],6);
+ bases["Topo (OpenTopoMap)"].addTo(mainMap);
+ L.control.layers(bases,null,{position:"topleft"}).addTo(mainMap);
+ HIKES.forEach(h=>{
+  if(TRACKS[h.id]){L.geoJSON(TRACKS[h.id],{style:{color:"#C2451E",weight:3,opacity:.9}}).on("click",()=>selectHike(h.id,false)).addTo(mainMap)}
+  const mk=L.marker([h.lat,h.lon],{icon:hikeIcon(false),title:h.name,alt:h.name,keyboard:true}).addTo(mainMap);
+  mk.bindTooltip("<b>"+esc(h.name)+"</b><br>"+REGIONS[h.region]+" · "+esc(h.stats.dist)+" · "+esc(h.stats.time)+" · "+DIFF[DIFFKEY[h.id]].label);
+  mk.on("click",()=>selectHike(h.id,false));
+  MARKERS[h.id]=mk;
+ });
+}
+function selectHike(id,pan){
+ selectedHike=id;const h=HIKES.find(x=>x.id===id);
+ Object.entries(MARKERS).forEach(([k,mk])=>mk.setIcon(hikeIcon(k===id)));
+ if(driveLine){driveLine.remove();driveLine=null}
+ driveLine=L.polyline([[h.townPin.lat,h.townPin.lon],[h.lat,h.lon]],{color:"#1F6180",weight:2,dashArray:"6 6",opacity:.8}).addTo(mainMap);
+ driveLine.bindTooltip("Approximate line from "+esc(h.townPin.name)+" — follow signposted roads");
+ const near=HIKES.filter(o=>o.id!==id).map(o=>({o,d:Math.hypot((o.lon-h.lon)*88,(o.lat-h.lat)*111)})).sort((a,b)=>a.d-b.d).slice(0,3);
+ $("#mapSide").innerHTML=`
+  <span class="eyebrow">${REGIONS[h.region]}</span>
+  <h3>${esc(h.name)}</h3>
+  <div class="statrow">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}</div>
+  <p style="font-size:.88rem;color:var(--ink2);margin:.2em 0">${esc(h.tagline)}</p>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:.84rem" class="num">
+   <span><b>${esc(h.stats.dist)}</b><br><span style="color:var(--ink3);font-size:.7rem">DISTANCE</span></span>
+   <span><b>${esc(h.stats.time)}</b><br><span style="color:var(--ink3);font-size:.7rem">TIME</span></span>
+   <span><b>${esc(h.stats.high)}</b><br><span style="color:var(--ink3);font-size:.7rem">HIGH POINT</span></span>
+   <span><b>${esc(h.type)}</b><br><span style="color:var(--ink3);font-size:.7rem">TYPE</span></span>
+  </div>
+  <div class="alt-mini"><b>Nearest town:</b> ${esc(h.town)}<br><b>Track line:</b> ${GEOSRC[h.id]}<br><b>Nearby featured tracks:</b> ${near.map(n=>esc(n.o.short)+" (~"+Math.round(n.d)+" km)").join(" · ")}</div>
+  <a class="go" href="#hike-${h.id}">Open the full guide ↓</a>`;
+ if(pan&&TRACKS[id]){mainMap.fitBounds(L.geoJSON(TRACKS[id]).getBounds().pad(0.5))}
+}
+function initMiniMap(h){
+ const el=document.getElementById("mm-"+h.id);if(!el||MINIS[h.id])return;
+ const bases=makeBases();
+ const m=L.map(el,{scrollWheelZoom:false});
+ bases["Topo (OpenTopoMap)"].addTo(m);
+ L.control.layers(bases,null,{position:"topright"}).addTo(m);
+ let line=[];
+ if(TRACKS[h.id]){
+  const gl=L.geoJSON(TRACKS[h.id],{style:{color:"#C2451E",weight:4,opacity:.95}}).addTo(m);
+  m.fitBounds(gl.getBounds().pad(0.18));
+  line=flatLatLngs(TRACKS[h.id]);
+ }else{m.setView([h.lat,h.lon],13);L.marker([h.lat,h.lon]).addTo(m).bindTooltip("Approximate location — official geometry unavailable")}
+ if(line.length){L.circleMarker(line[0],{radius:6,color:"#fff",weight:2,fillColor:"#24513F",fillOpacity:1}).addTo(m).bindTooltip("Trailhead end of the line")}
+ const cum=[0];for(let i=1;i<line.length;i++)cum.push(cum[i-1]+m.distance(line[i-1],line[i]));
+ const cursor=line.length?L.circleMarker(line[0],{radius:7,color:"#fff",weight:2,fillColor:"#1F6180",opacity:0,fillOpacity:0}).addTo(m):null;
+ MINIS[h.id]={map:m,line,cum,cursor};
+}
+function trackPointAt(hid,frac){
+ const mm=MINIS[hid];if(!mm||!mm.line.length)return null;
+ const target=frac*mm.cum[mm.cum.length-1];
+ let i=1;while(i<mm.cum.length&&mm.cum[i]<target)i++;
+ if(i>=mm.line.length)return mm.line[mm.line.length-1];
+ const t=(target-mm.cum[i-1])/((mm.cum[i]-mm.cum[i-1])||1);
+ const a=mm.line[i-1],b=mm.line[i];
+ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t];
+}
+/* ==================== FILTERS ==================== */
+const FILTERS={region:null,difficulty:null,duration:null,type:null};
+const FDEFS={
+ region:Object.entries(REGIONS).filter(([k])=>HIKES.some(h=>h.region===k)).map(([k,v])=>[k,v]),
+ difficulty:[["easy","Easy"],["mod","Moderate"],["adv","Advanced"],["alp","Alpine"]],
+ duration:[["short","< 2 hr"],["half","2–5 hr"],["full","5–8 hr"],["multi","Overnight"]],
+ type:[["loop","Loop"],["return","Return"],["point","Point-to-point"],["overnight","Overnight tramp"]]};
+function hikeMatches(h){
+ if(FILTERS.region&&h.region!==FILTERS.region)return false;
+ if(FILTERS.difficulty&&DIFFKEY[h.id]!==FILTERS.difficulty)return false;
+ if(FILTERS.type&&TYPEKEY[h.id]!==FILTERS.type)return false;
+ if(FILTERS.duration){const d=FILTERS.duration;const hrs=h.durationH;const bucket=h.overnight?"multi":hrs<2?"short":hrs<=5?"half":"full";if(bucket!==d)return false}
+ return true}
+function applyFilters(){
+ HIKES.forEach(h=>{const ok=hikeMatches(h);const mk=MARKERS[h.id];if(mk&&mk._icon)mk._icon.style.opacity=ok?"1":"0.25";const card=$(`#card-${h.id}`);if(card)card.classList.toggle("hidden",!ok)});
+ $("#cardEmpty").style.display=HIKES.some(hikeMatches)?"none":"block"}
+function buildFilters(){
+ $$("#mapFilters .fgroup").forEach(gr=>{const key=gr.dataset.fgroup;gr.innerHTML=FDEFS[key].map(([v,l])=>`<button type="button" class="chip" data-f="${key}" data-v="${v}" aria-pressed="false">${l}</button>`).join("")});
+ $("#mapFilters").addEventListener("click",e=>{const b=e.target.closest(".chip[data-f]");if(!b)return;const{f,v}=b.dataset;FILTERS[f]=FILTERS[f]===v?null:v;$$(`#mapFilters .chip[data-f="${f}"]`).forEach(c=>c.setAttribute("aria-pressed",c.dataset.v===FILTERS[f]));applyFilters()});
+ $("#clearFilters").onclick=()=>{Object.keys(FILTERS).forEach(k=>FILTERS[k]=null);$$("#mapFilters .chip[data-f]").forEach(c=>c.setAttribute("aria-pressed","false"));applyFilters()}}
+
+/* ==================== CARDS ==================== */
+function buildCards(){
+ $("#cards").innerHTML=HIKES.map((h,i)=>`
+  <article class="card rv" id="card-${h.id}" tabindex="0" role="link" aria-label="Open guide: ${esc(h.name)}" data-target="hike-${h.id}">
+   <div class="art">${cardArt(h.route.terrain,i)}<span class="rname">${esc(h.short)}</span></div>
+   <div class="body">
+    <div class="meta">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}</div>
+    <p class="desc">${esc(h.tagline)}</p>
+    <div class="nums num">
+     <span><span class="n">${esc(h.stats.dist)}</span><br><span class="l">Distance</span></span>
+     <span><span class="n">${esc(h.stats.time)}</span><br><span class="l">Time</span></span>
+     <span><span class="n">${esc(h.stats.high)}</span><br><span class="l">High point</span></span>
+    </div>
+   </div>
+  </article>`).join("");
+ $("#cards").addEventListener("click",e=>{const c=e.target.closest(".card");if(c)location.hash="#"+c.dataset.target});
+ $("#cards").addEventListener("keydown",e=>{if(e.key==="Enter"){const c=e.target.closest(".card");if(c)location.hash="#"+c.dataset.target}})}
+
+/* ==================== COMPARE TABLE ==================== */
+function buildCompare(){
+ const head=["Track","Region","Distance","Time","Difficulty","High point","Type","Alpine exposure","Overnight?","Hut","Camping","Est. cost (pp)","Best season","Highlight","Popularity","Status"];
+ const rows=HIKES.map(h=>{const x=CMP_EXTRA[h.id];const pct=Math.round(h.distKm/19.4*100);
+  return `<tr>
+   <th scope="row"><a href="#hike-${h.id}" style="color:inherit">${esc(h.short)}</a></th>
+   <td>${REGIONS[h.region]}</td>
+   <td class="num">${esc(h.stats.dist)}<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div></td>
+   <td class="num">${esc(h.stats.time)}</td><td>${diffBadge(DIFFKEY[h.id])}</td>
+   <td class="num">${esc(h.stats.high)}</td><td>${esc(h.type)}</td><td>${x.alpine}</td>
+   <td>${h.overnight?"Yes":"Optional/No"}</td><td>${x.hut}</td><td>${x.camp}</td>
+   <td class="num">${x.cost}</td><td>${x.season}</td><td>${x.light}</td><td>${x.pop}</td>
+   <td>${statusBadge(h.status)}</td></tr>`}).join("");
+ $("#cmpTable").innerHTML=`<thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody>`}
+
+/* ==================== ROUTE MAP + ELEVATION ==================== */
+const POI_STYLE={TH:["P","var(--forest)"],HUT:["H","var(--volcanic)"],TOILET:["T","var(--ocean)"],VIEW:["★","var(--tussock)"],HAZ:["!","var(--alert)"],JCT:["◆","var(--ink3)"],WTR:["W","var(--ocean)"],SHUT:["S","var(--forest-soft)"],EXIT:["E","var(--alert)"]};
+function polyToPath(pts){return "M"+pts.map(p=>p.join(" ")).join(" L")}
+function buildRouteSvg(h){
+ const r=h.route;const main=polyToPath(r.path);
+ const bgMap={volcano:`<circle class="contour" cx="160" cy="90" r="26"/><circle class="contour" cx="160" cy="90" r="16"/><circle class="contour" cx="40" cy="40" r="20"/>`,
+  cone:`<circle class="contour" cx="170" cy="95" r="30"/><circle class="contour" cx="170" cy="95" r="18"/><circle class="contour" cx="170" cy="95" r="8"/>`,
+  coast:`<path class="water" d="M0 0 H200 V26 C150 34 60 30 0 40 Z"/>`,
+  harbour:`<path class="water" d="M0 0 H200 V50 C160 66 120 56 96 70 C70 84 40 78 0 92 Z" />`,
+  range:`<path class="contour" d="M120 20 C140 40 150 70 175 100"/><path class="contour" d="M100 20 C122 44 132 74 158 108"/>`,
+  scarp:`<path class="contour" d="M70 10 C80 50 80 80 60 115"/><path class="contour" d="M90 8 C100 48 100 82 82 118"/>`};
+ const arrows=r.path.slice(1,-1).filter((_,i)=>i%3===1).map((p,i,arr)=>{const idx=r.path.indexOf(p);const a=r.path[idx-1],b=r.path[idx+1];const ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;return `<path d="M-3 -2.4 L3 0 L-3 2.4 Z" fill="var(--volcanic)" transform="translate(${p[0]},${p[1]}) rotate(${ang})"/>`}).join("");
+ const pois=r.pois.map(p=>{let pt;if(p[0]>=0){pt=r.path[Math.min(p[0],r.path.length-1)]}else{const cp=r.closed||r.path;pt=cp[Math.min(Math.abs(p[0]),cp.length-1)]}
+  const[sym,col]=POI_STYLE[p[1]];return `<g><circle cx="${pt[0]}" cy="${pt[1]}" r="3.6" fill="${col}" stroke="var(--paper)" stroke-width="1"/><text x="${pt[0]}" y="${pt[1]+1.9}" text-anchor="middle" style="font-size:4.6px;fill:#fff;font-weight:700">${sym}</text><text class="poilabel" x="${pt[0]+5.5}" y="${pt[1]+2}">${esc(p[2])}</text></g>`}).join("");
+ const closed=r.closed?`<path class="rm-closed" d="${polyToPath(r.closed)}"/>`:"";
+ return `<svg viewBox="-4 -4 208 128" role="img" aria-label="Schematic route map: ${esc(h.name)}. ${esc(r.caption)}">
+   <rect x="-4" y="-4" width="208" height="128" class="land" rx="6"/>${bgMap[r.terrain]||""}
+   ${closed}<path class="rm-track" d="${main}" id="rt-${h.id}"/>${arrows}${pois}
+   <circle class="rm-cursor" id="rc-${h.id}" r="4"/></svg>`}
+function buildElevSvg(h){
+ const W=340,H=150,padL=34,padB=22,padT=12,padR=10;
+ const pts=h.elev;const maxD=pts[pts.length-1][0];const els=pts.map(p=>p[1]);
+ let lo=Math.min(...els),hi=Math.max(...els);const span=hi-lo||1;lo=Math.max(0,lo-span*.12);hi+=span*.1;
+ const X=d=>padL+(d/maxD)*(W-padL-padR), Y=e=>padT+(1-(e-lo)/(hi-lo))*(H-padT-padB);
+ const line=pts.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join(" ");
+ const area=line+` L${X(maxD)} ${H-padB} L${padL} ${H-padB} Z`;
+ const yticks=[0,1,2,3].map(i=>{const e=lo+(hi-lo)*i/3;const y=Y(e);return `<line class="ex-grid" x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}"/><text x="${padL-4}" y="${y+2}" text-anchor="end" class="num">${Math.round(e/10)*10}</text>`}).join("");
+ const xticks=[0,.25,.5,.75,1].map(f=>{const d=maxD*f;return `<text x="${X(d)}" y="${H-8}" text-anchor="middle" class="num">${d.toFixed(d<10?1:0)} km</text>`}).join("");
+ return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Elevation profile for ${esc(h.name)}, from ${Math.round(els[0])} metres to a high point of ${Math.round(Math.max(...els))} metres over ${maxD} kilometres. Approximate.">
+  ${yticks}${xticks}
+  <text x="6" y="12" style="font-size:7px">m</text>
+  <path class="ex-area" d="${area}"/><path class="ex-path" d="${line}"/>
+  <line class="ex-cross" id="ec-${h.id}" y1="${padT}" y2="${H-padB}" x1="0" x2="0"/>
+  <circle class="ex-dot" id="ed-${h.id}" r="3.5"/>
+  <rect class="ex-hit" id="eh-${h.id}" x="${padL}" y="0" width="${W-padL-padR}" height="${H}" data-maxd="${maxD}" data-padl="${padL}" data-padr="${padR}" data-w="${W}"/></svg>
+  <div id="elevTipT" class="elevtip"></div>`}
+function elevInteract(h,wrap){
+ const hit=$("#eh-"+h.id,wrap);if(!hit)return;
+ const cross=$("#ec-"+h.id,wrap),dot=$("#ed-"+h.id,wrap),tipEl=$(".elevtip",wrap);
+ const pts=h.elev,maxD=pts[pts.length-1][0];
+ function elevAt(d){for(let i=1;i<pts.length;i++){if(d<=pts[i][0]){const[d0,e0]=pts[i-1],[d1,e1]=pts[i];return e0+(e1-e0)*((d-d0)/(d1-d0||1))}}return pts[pts.length-1][1]}
+ function move(clientX){
+  if(!MINIS[h.id]&&TRACKS[h.id]!==undefined)initMiniMap(h);
+  const svg=hit.ownerSVGElement,r=svg.getBoundingClientRect();
+  const W=+hit.dataset.w,padL=+hit.dataset.padl,padR=+hit.dataset.padr;
+  const xs=(clientX-r.left)/r.width*W;const frac=Math.max(0,Math.min(1,(xs-padL)/(W-padL-padR)));
+  const d=frac*maxD,e=elevAt(d);
+  cross.setAttribute("x1",xs);cross.setAttribute("x2",xs);cross.style.opacity=1;
+  const els=pts.map(p=>p[1]);let lo=Math.min(...els),hi=Math.max(...els);const span=hi-lo||1;lo=Math.max(0,lo-span*.12);hi+=span*.1;
+  const y=12+(1-(e-lo)/(hi-lo))*(150-12-22);
+  dot.setAttribute("cx",xs);dot.setAttribute("cy",y);dot.style.opacity=1;
+  if(tipEl){tipEl.style.display="block";tipEl.textContent=`${d.toFixed(1)} km · ${Math.round(e)} m`}
+  const mm=MINIS[h.id],pt=trackPointAt(h.id,frac);
+  if(mm&&mm.cursor&&pt){mm.cursor.setLatLng(pt);mm.cursor.setStyle({opacity:1,fillOpacity:1})}}
+ function leave(){cross.style.opacity=0;dot.style.opacity=0;if(tipEl)tipEl.style.display="none";const mm=MINIS[h.id];if(mm&&mm.cursor)mm.cursor.setStyle({opacity:0,fillOpacity:0})}
+ hit.addEventListener("pointermove",e=>move(e.clientX));
+ hit.addEventListener("pointerdown",e=>move(e.clientX));
+ hit.addEventListener("pointerleave",leave)}
+
+/* ==================== HIKE SECTION RENDER ==================== */
+function kv(label,val){return `<tr><th style="width:38%">${label}</th><td>${val}</td></tr>`}
+function renderHikes(){
+ $("#hikes").innerHTML=HIKES.map(h=>{
+  const words=h.name.split(" ").map((w,i)=>`<span class="hw" style="--i:${i}">${esc(w)}</span>`).join(" ");
+  const alertHtml=h.status.level==="open"?"":`<div class="alertbar ${h.status.level==="closed"?"bad":"warn"}"><span class="ic">${h.status.level==="closed"?"⛔":"⚠️"}</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`;
+  const okNote=h.status.level==="open"?`<div class="alertbar warn" style="background:var(--chip-easy);border-color:color-mix(in srgb,var(--good) 35%,transparent)"><span class="ic">✅</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`:"";
+  const e=h.essentials;
+  return `<section class="hike block" id="hike-${h.id}" data-hike="${h.id}">
+   <div class="region-water" aria-hidden="true">${REGIONS[h.region]}</div>
+   <div class="container">
+    <span class="idx">${h.num} / 10 — ${REGIONS[h.region].toUpperCase()}</span>
+    <h2 class="tname">${words}</h2>
+    <p class="tagline">${esc(h.tagline)}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}<span class="badge b-mod">🥾 ${esc(h.type)}</span>${h.overnight?'<span class="badge b-adv">🌙 Overnight</span>':""}</div>
+    ${alertHtml||okNote}
+    ${PHOTOS[h.id]?`<figure class="hikephoto rv2"><img loading="lazy" src="${PHOTOS[h.id].src}" alt="${esc(PHOTOS[h.id].cap)}"><figcaption>${esc(PHOTOS[h.id].cap)} — photo: ${esc(PHOTOS[h.id].credit)}, <a href="${PHOTOS[h.id].page}" target="_blank" rel="noopener">${PHOTOS[h.id].lic} via Wikimedia Commons</a></figcaption></figure>`:""}
+    <div class="statgrid">
+     <div class="stat"><div class="n num" data-stat="${esc(h.stats.dist)}">${esc(h.stats.dist)}</div><div class="l">Distance</div></div>
+     <div class="stat"><div class="n num">${esc(h.stats.time)}</div><div class="l">Walking time</div></div>
+     <div class="stat"><div class="n num">${esc(h.stats.gain)}</div><div class="l">Elevation gain</div></div>
+     <div class="stat"><div class="n num">${esc(h.stats.high)}</div><div class="l">Highest point</div></div>
+    </div>
+    ${h.statNote?`<p style="font-size:.75rem;color:var(--ink3);margin-top:-12px">${esc(h.statNote)}</p>`:""}
+
+    <div class="duo">
+     <div class="panel routemap rv2">
+      <h4>🗺 Route map <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— official track line; still carry the paper map</span></h4>
+      <div class="minimap" id="mm-${h.id}" role="application" aria-label="Interactive map of the ${esc(h.name)} route"></div>
+      <p class="cap"><b>Track line:</b> ${GEOSRC[h.id]}. <b>Key waypoints along the way:</b> ${h.route.pois.map(p=>esc(p[2])).join(" · ")}. ${esc(h.route.caption)}${h.route.closed?" Closed sections are described in the alert above — the line shown may include currently closed track.":""}</p>
+     </div>
+     <div class="panel elev rv2">
+      <h4>⛰ Elevation profile <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— approximate</span></h4>
+      ${buildElevSvg(h)}
+      <p class="cap">Touch or hover the chart — the blue dot on the route map tracks the same spot (position along the official line is approximate). ${h.elevNote?esc(h.elevNote):""}</p>
+     </div>
+    </div>
+
+    <div class="pull rv">${h.pull}</div>
+
+    <h3 class="rv">What it’s like</h3>
+    ${h.like.map(p=>`<p class="rv">${p}</p>`).join("")}
+    <div class="gearcols rv2">
+     <div class="gear"><h5>Crowds</h5><ul><li>${esc(h.features.crowds)}</li></ul></div>
+     <div class="gear"><h5>Photography</h5><ul><li>${esc(h.features.photos)}</li></ul></div>
+     <div class="gear"><h5>Sunrise / sunset</h5><ul><li>${esc(h.features.sun)}</li></ul></div>
+    </div>
+
+    <details class="x rv"><summary>📋 Essential track details<span class="chev">▾</span></summary><div class="dx"><table>
+     ${kv("Official name",esc(h.name))}${kv("Region",REGIONS[h.region])}${kv("Nearest town",esc(h.town))}
+     ${kv("Trailhead / access",esc(e.trailhead))}${kv("Track type",esc(h.type))}${kv("Surface & terrain",esc(e.surface))}
+     ${kv("Best seasons",esc(e.seasons))}${kv("Weather exposure",esc(e.exposure))}${kv("Fitness & experience",esc(e.fitness))}
+     ${kv("Suitable for children",esc(e.kids))}${kv("Dogs",esc(e.dogs))}${kv("Mobile coverage",esc(e.mobile))}
+     ${kv("Water",esc(e.water))}${kv("Emergency & turnaround",esc(e.emergency))}
+    </table></div></details>
+
+    <details class="x rv"><summary>🥾 Track options &amp; routes<span class="chev">▾</span></summary><div class="dx"><div class="optlist">
+     ${h.options.map((o,i)=>`<div class="opt ${i===0?"rec":""}"><span class="otag">${esc(o.tag)}</span><h5>${esc(o.name)}</h5>
+      <div class="ometa">${o.dir?`<span><b>Direction:</b> ${esc(o.dir)}</span>`:""}${Object.entries(o.meta||{}).filter(([,v])=>v).map(([k,v])=>`<span><b>${{dist:"Distance",time:"Time",elev:"Elevation",diff:"Difficulty",kind:""}[k]||k}${k==="kind"?"":":"}</b> ${esc(v)}</span>`).join("")}</div>
+      <p class="why">${esc(o.why)}</p>${o.needs?`<p class="why" style="color:var(--ink3)"><b>Needs:</b> ${esc(o.needs)}</p>`:""}</div>`).join("")}
+    </div></div></details>
+
+    <details class="x rv"><summary>🕐 Suggested itinerary <span style="font-weight:400;color:var(--ink3)">(times approximate)</span><span class="chev">▾</span></summary><div class="dx">
+     <p style="margin-top:8px"><b>${esc(h.itinerary.title)}</b></p>
+     <table>${h.itinerary.rows.map(r=>`<tr><th style="white-space:nowrap;width:110px">${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join("")}</table></div></details>
+
+    <details class="x rv"><summary>🎒 Gear checklist<span class="chev">▾</span></summary><div class="dx">
+     <div class="gearcols">${h.gear.groups.map(g=>`<div class="gear"><h5>${esc(g[0])}</h5><ul>${g[1].map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>
+     <div class="gwarn">⚠️ ${esc(h.gear.warn)}</div></div></details>
+
+    <details class="x rv"><summary>🛏 Accommodation &amp; costs<span class="chev">▾</span></summary><div class="dx">
+     <table>${h.accom.map(a=>`<tr><th>${esc(a[0])}</th><td>${esc(a[1])}<br><em style="color:var(--ink3)">${esc(a[2])}</em></td></tr>`).join("")}</table>
+     <p style="margin-top:14px"><b>Costs (NZD, per adult unless noted)</b></p>
+     <table>${h.costs.map(c=>`<tr><th>${esc(c[0])}</th><td class="num">${esc(c[1])}</td><td style="color:var(--ink3);font-size:.76rem;white-space:nowrap">${esc(c[2])}</td></tr>`).join("")}</table>
+     <p style="font-size:.76rem;color:var(--ink3)">Fees vary by season, age and booking type; DOC updated hut fees on 1 July 2026. Always confirm on the linked official pages.</p></div></details>
+
+    <h3 class="rv" style="margin-top:34px">Alternative &amp; nearby tracks</h3>
+    <p class="rv" style="font-size:.9rem;color:var(--ink2)">Ranked by relevance — the most recommended alternative first.</p>
+    <div class="optlist rv2">
+     ${h.alternatives.map((a,i)=>`<div class="opt ${i===0?"rec":""}"><span class="otag">${esc(a.rank)}</span><h5>${esc(a.name)}</h5>
+      <div class="ometa"><span><b>Location:</b> ${esc(a.loc)}</span>${Object.entries(a.meta).map(([k,v])=>`<span><b>${{dist:"Distance",time:"Time",diff:"Difficulty",kind:"Day/overnight"}[k]}:</b> ${esc(v)}</span>`).join("")}<span><b>Status:</b> ${esc(a.status)}</span></div>
+      <p class="why">${esc(a.why)}</p><p class="why" style="color:var(--ink3)"><b>Safety:</b> ${esc(a.safety)}</p>
+      <p class="src">Source: <a href="${a.src.u}" target="_blank" rel="noopener">${esc(a.src.t)}</a></p></div>`).join("")}
+    </div>
+
+    <div class="sources rv">
+     <span class="lc">Last checked: ${CHECKED}</span>
+     <b>Sources for this hike</b>
+     <ul>${h.sources.map(s=>`<li><a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></li>`).join("")}</ul>
+     <p style="font-size:.76rem;color:var(--ink3);margin-top:8px">Weather: check the MetService forecast linked above before travelling. This page is a guide, not a substitute for official DOC information or your own judgement.</p>
+    </div>
+   </div></section>`}).join("");
+ HIKES.forEach(h=>{const sec=$("#hike-"+h.id);elevInteract(h,sec)});
+ $("#hikenavRail").innerHTML=HIKES.map(h=>`<a href="#hike-${h.id}" data-hikelink="${h.id}">${h.num} ${esc(h.short)}</a>`).join("");
+}
+
+/* ==================== BUDGET ==================== */
+function buildBudget(){
+ $("#bHike").innerHTML=HIKES.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join("");
+ const els=["bHike","bMode","bStay","bPeople","bNights","bKm","bShuttle","bHire"].map(id=>$("#"+id));
+ $("#bHike").addEventListener("change",()=>{const d=BUDGET_DEF[$("#bHike").value];$("#bKm").value=d.km;$("#bShuttle").value=d.shuttle&&d.shuttle>10?"1":"0";$("#bMode").value=d.hut?"hut":"day";$("#bHire").value="0";calcBudget()});
+ els.forEach(el=>el.addEventListener("input",calcBudget));
+ calcBudget()}
+function calcBudget(){
+ const id=$("#bHike").value,d=BUDGET_DEF[id],h=HIKES.find(x=>x.id===id);
+ const mode=$("#bMode").value,stay=$("#bStay").value;
+ const ppl=Math.max(1,+$("#bPeople").value||1),nights=Math.max(0,+$("#bNights").value||0),km=Math.max(0,+$("#bKm").value||0);
+ const rows=[];let total=0;const add=(l,v)=>{if(v>0){rows.push([l,v]);total+=v}};
+ add("Fuel (~9 L/100 km @ $2.75/L)",Math.round(km*0.09*2.75));
+ if(mode==="hut")add(`Hut fees (${nights||1} night${(nights||1)>1?"s":""} × ${ppl})`,(d.hut||20)*(nights||1)*ppl);
+ if(mode==="camp")add(`Campsite fees (${nights||1} × ${ppl})`,(d.camp||15)*(nights||1)*ppl);
+ if(stay==="budget")add(`Town accommodation — budget (${nights||1} × ${ppl})`,45*(nights||1)*ppl);
+ if(stay==="mid")add(`Town accommodation — mid-range (${nights||1} × ${ppl})`,120*(nights||1)*ppl);
+ if($("#bShuttle").value==="1")add(`Shuttle / transport (${ppl} pp)`,(d.shuttle||45)*ppl);
+ const days=Math.max(1,nights+1);
+ add(`Food (${days} day${days>1?"s":""} × ${ppl})`,(mode==="day"?25:40)*days*ppl);
+ const hire=$("#bHire").value;if(hire==="basic")add("Equipment hire — basic",30*days*ppl);if(hire==="alpine")add("Equipment hire — alpine kit",50*days*ppl);
+ const lo=Math.round(total*0.85/5)*5, hi=Math.round(total*1.25/5)*5;
+ $("#budgetOut").innerHTML=`<div class="big num">$${lo} – $${hi} <span style="font-size:.45em;color:var(--ink3);font-family:var(--body)">NZD estimated range · ${esc(h.short)}</span></div>
+  <table>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="num">$${r[1]}</td></tr>`).join("")}<tr><td><b>Working total</b></td><td class="num"><b>$${total}</b></td></tr></table>`}
+
+/* ==================== SCROLL FX ==================== */
+function initHero(){
+ const words=["Ten","tracks,","one","island","—","walked","on","paper,","checked","at","the","source."];
+ $("#heroTitle").innerHTML=words.map((w,i)=>`<span class="w ${["island","source."].includes(w)?"it":""}" style="--i:${i}">${w}</span>`).join(" ")}
+function animCount(el){
+ const target=+el.dataset.count,suf=el.dataset.suffix||"";
+ if(REDUCED){el.textContent=target.toLocaleString()+suf;return}
+ const t0=performance.now(),dur=1400;
+ function tick(t){const p=Math.min(1,(t-t0)/dur),v=Math.round(target*(1-Math.pow(1-p,3)));el.textContent=v.toLocaleString()+suf;if(p<1)requestAnimationFrame(tick)}
+ requestAnimationFrame(tick)}
+let __ioFired=false;
+function initObservers(){
+ const io=new IntersectionObserver(es=>es.forEach(en=>{__ioFired=true;if(en.isIntersecting){en.target.classList.add("on");if(en.target.dataset.count)animCount(en.target);io.unobserve(en.target)}}),{threshold:.15});
+ $$(".rv,.rv2,[data-count]").forEach(el=>io.observe(el));
+ const hio=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)en.target.classList.add("seen")}),{threshold:.12});
+ $$(".hike").forEach(s=>hio.observe(s));
+ const navIo=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const id=en.target.id;$$("#navlinks a").forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+id));}})},{rootMargin:"-30% 0px -60% 0px"});
+ ["map","choose","compare","hikes","budget","safety"].forEach(id=>{const el=document.getElementById(id);if(el)navIo.observe(el)});
+ const hnIo=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const id=en.target.dataset.hike;$$("#hikenavRail a").forEach(a=>a.classList.toggle("active",a.dataset.hikelink===id));const act=$(`#hikenavRail a[data-hikelink="${id}"]`);if(act)act.scrollIntoView({block:"nearest",inline:"center",behavior:REDUCED?"auto":"smooth"})}})},{rootMargin:"-40% 0px -55% 0px"});
+ $$(".hike").forEach(s=>hnIo.observe(s));
+ const hikesRegion=new IntersectionObserver(es=>{es.forEach(en=>$("#hikenav").classList.toggle("show",en.isIntersecting))},{rootMargin:"-56px 0px 0px 0px",threshold:0});
+ hikesRegion.observe($("#hikes"));
+ setTimeout(()=>{if(!__ioFired){
+  document.documentElement.classList.add("no-io");
+  $$("[data-count]").forEach(el=>{el.textContent=(+el.dataset.count).toLocaleString()+(el.dataset.suffix||"")});
+  $$(".hike").forEach(sec=>sec.classList.add("seen"));
+ }},1800)}
+function initScroll(){
+ let ticking=false;
+ addEventListener("scroll",()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{
+  const max=document.documentElement.scrollHeight-innerHeight;
+  $("#progress").style.width=(scrollY/max*100)+"%";
+  $("#backtop").classList.toggle("show",scrollY>1200);
+  if(!REDUCED){$$(".hike .region-water").forEach(w=>{const r=w.parentElement.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){w.style.setProperty("--wy",((innerHeight-r.top)*.06)+"px")}})}
+  ticking=false})},{passive:true});
+ $("#backtop").onclick=()=>scrollTo({top:0,behavior:REDUCED?"auto":"smooth"})}
+function initTheme(){
+ $("#themeBtn").onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=cur==="dark"?"light":"dark"}}
+
+/* ==================== BOOT ==================== */
+initHero();buildFilters();buildCards();buildCompare();renderHikes();buildBudget();initObservers();initScroll();initTheme();
+loadTracks().then(()=>{
+ buildMap();
+ selectHike("tongariro",false);
+ const mmIo=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){const h=HIKES.find(x=>"mm-"+x.id===en.target.id);if(h){initMiniMap(h);mmIo.unobserve(en.target)}}}),{rootMargin:"300px 0px"});
+ $$(".minimap").forEach(el=>mmIo.observe(el));
+ setTimeout(()=>{if(!__ioFired)HIKES.forEach((h,i)=>setTimeout(()=>initMiniMap(h),350*i))},2200);
+});
+</script>
+<style>.poilabel{paint-order:stroke;stroke:var(--map-land);stroke-width:2px;font-size:5.6px}.elevtip{position:absolute;top:44px;right:22px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:.76rem;display:none;font-variant-numeric:tabular-nums}</style>
