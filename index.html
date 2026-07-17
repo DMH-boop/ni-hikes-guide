@@ -1616,7 +1616,7 @@ function buildFilters(){
 function buildCards(){
  $("#cards").innerHTML=HIKES.map((h,i)=>`
   <article class="card rv" id="card-${h.id}" tabindex="0" role="link" aria-label="Open guide: ${esc(h.name)}" data-target="hike-${h.id}">
-   <div class="art">${PHOTOS[h.id]?`<img loading="lazy" src="${PHOTOS[h.id].src.replace("/1920px-","/640px-")}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`:cardArt(h.route.terrain,i)}<span class="rname">${esc(h.short)}</span></div>
+   <div class="art">${PHOTOS[h.id]?`<img loading="lazy" src="${PHOTOS[h.id].src.replace("/1920px-","/500px-")}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">`:cardArt(h.route.terrain,i)}<span class="rname">${esc(h.short)}</span></div>
    <div class="body">
     <div class="meta">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}</div>
     <p class="desc">${esc(h.tagline)}</p>
