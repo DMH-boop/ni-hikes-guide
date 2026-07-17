@@ -67,6 +67,41 @@ button{font-family:var(--body)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .skiplink{position:absolute;left:-9999px;top:0;background:var(--forest);color:#fff;padding:10px 16px;z-index:100;border-radius:0 0 10px 0;font-weight:700}
 .skiplink:focus{left:0}
+/* icon system */
+.ic{width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.18em;flex:none}
+.ic.lg{width:1.3em;height:1.3em}
+/* button system */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:10px;font-family:var(--body);font-size:.92rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,transform .05s;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--forest);color:#fff}
+:root[data-theme="dark"] .btn-primary{color:var(--paper)}
+.btn-primary:hover{background:var(--forest-soft)}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn-secondary:hover{border-color:var(--forest);color:var(--forest)}
+.btn-ghost{background:transparent;color:var(--ink2);border-color:transparent}
+.btn-ghost:hover{background:var(--surface2);color:var(--ink)}
+.btn.loading .ic{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.btn.loading .ic{animation:none}}
+/* stepper */
+.stepper{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+.stepper button{width:40px;border:none;background:var(--surface2);color:var(--ink);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.stepper button:hover{background:var(--line-soft)}
+.stepper input{border:none !important;border-radius:0 !important;text-align:center;width:100%;min-width:52px;-moz-appearance:textfield;background:var(--paper);color:var(--ink);font-size:.95rem;font-variant-numeric:tabular-nums}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+/* unified card polish */
+.panel,.stat,.opt,.gear,.safecard,details.x{border-color:var(--line-soft)}
+.panel h4 .ic,.safecard h4 .ic,summary .ic{color:var(--forest)}
+details.x summary{min-height:48px}
+.badge .ic{width:.95em;height:.95em}
+/* segmented control */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:none;background:var(--surface);color:var(--ink2);padding:9px 16px;font-weight:700;font-size:.86rem;cursor:pointer;min-height:40px}
+.seg button+button{border-left:1px solid var(--line-soft)}
+.seg button[aria-pressed="true"]{background:var(--forest);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:var(--paper)}
+.seg button:focus-visible{outline:2.5px solid var(--ocean);outline-offset:-3px}
 ::selection{background:var(--forest);color:var(--paper)}
 
 /* reveal-on-scroll */
@@ -217,7 +252,7 @@ table.cmp tbody tr:hover td{background:var(--surface2)}
 .alertbar.warn{background:var(--chip-adv);border-color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink)}
 .alertbar.bad{background:var(--chip-exp);border-color:var(--alert);border-color:color-mix(in srgb,var(--alert) 45%,transparent);color:var(--ink)}
 .alertbar b{color:inherit}
-.alertbar .ic{flex:none;margin-top:2px}
+.alertbar .alic{flex:none;margin-top:2px;color:inherit}
 .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:22px 0}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .stat .n{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,2.6vw,1.9rem);color:var(--ink)}
@@ -226,7 +261,7 @@ table.cmp tbody tr:hover td{background:var(--surface2)}
 .duo{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start;margin:14px 0 8px}
 @media (max-width:880px){.duo{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-.panel h4{font-size:1.02rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel h4{font-size:1.02rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .panel .cap{font-size:.72rem;color:var(--ink3);margin-top:8px;line-height:1.45}
 .elev svg{width:100%;height:auto;display:block}
 
@@ -245,7 +280,7 @@ table.cmp tbody tr:hover td{background:var(--surface2)}
 details.x{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:8px 0;overflow:hidden}
 details.x summary{cursor:pointer;list-style:none;padding:13px 16px;font-weight:700;font-size:.93rem;display:flex;align-items:center;gap:10px;color:var(--ink)}
 details.x summary::-webkit-details-marker{display:none}
-details.x summary .chev{margin-left:auto;transition:transform .25s;color:var(--ink3);flex:none}
+details.x summary .chev{margin-left:auto;transition:transform .25s;color:var(--ink3);flex:none;display:inline-flex}
 details.x[open] summary .chev{transform:rotate(180deg)}
 details.x .dx{padding:2px 16px 16px;font-size:.9rem;color:var(--ink2)}
 details.x .dx ul{margin:.3em 0;padding-left:1.2em}
@@ -292,7 +327,48 @@ details.x .dx table td,details.x .dx table th{padding:7px 8px;border-bottom:1px 
 #budgetOut table{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:10px}
 #budgetOut td{padding:6px 4px;border-bottom:1px solid var(--line-soft)}
 #budgetOut td:last-child{text-align:right;font-variant-numeric:tabular-nums}
-.bdisc{font-size:.74rem;color:var(--ink3);margin-top:10px}
+.bdisc{font-size:.74rem;color:var(--ink3);margin-top:10px;max-width:100ch}
+.tc-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:18px;align-items:start}
+@media (max-width:920px){.tc-grid{grid-template-columns:1fr}}
+.tc-inputs,.tc-results{display:flex;flex-direction:column;gap:14px}
+.tc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.tc-row{grid-template-columns:1fr}}
+.tc-hint{font-size:.74rem;color:var(--ink3);margin-top:5px;line-height:1.5}
+.tc-mini{height:28px;padding:0 10px;font-size:.76rem}
+.tc-suggest{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;margin-top:4px}
+.tc-suggest button{display:block;width:100%;text-align:left;padding:10px 13px;border:none;background:none;color:var(--ink);font-size:.86rem;cursor:pointer}
+.tc-suggest button:hover,.tc-suggest button:focus-visible{background:var(--surface2)}
+.tc-suggest .sub{color:var(--ink3);font-size:.74rem}
+.tc-ruc{border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;font-size:.86rem}
+.tc-ruc .rc-row{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.tc-ruc .rc-row b{font-variant-numeric:tabular-nums}
+.tc-check{display:flex;align-items:center;gap:9px;margin:8px 0;font-weight:600;cursor:pointer}
+.tc-check input{width:18px;height:18px;accent-color:var(--forest)}
+.tc-warn{background:var(--chip-adv);border-radius:9px;padding:9px 12px;font-size:.82rem;margin-top:8px;color:var(--ink)}
+.tc-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#tcStatus{min-height:1.4em;font-size:.86rem}
+#tcStatus .err{color:var(--alert);font-weight:600;display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+#tcStatus .ok{color:var(--good);font-weight:600}
+.tc-extra{display:grid;grid-template-columns:minmax(0,1.4fr) 100px minmax(0,1fr) 40px;gap:8px;margin-bottom:8px;align-items:center}
+@media (max-width:560px){.tc-extra{grid-template-columns:1fr 90px;grid-auto-rows:auto}.tc-extra select{grid-column:1}.tc-extra .rm{grid-column:2;justify-self:end}}
+.tc-extra input,.tc-extra select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:.88rem;font-family:var(--body)}
+.tc-extra .rm{width:40px;height:40px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--alert);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tc-extra .rm:hover{border-color:var(--alert)}
+.tc-placeholder{color:var(--ink3);font-size:.92rem;text-align:center;padding:34px 20px}
+.tc-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow)}
+.tc-card h5{margin:0 0 8px;font-family:var(--body);font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--forest);display:flex;align-items:center;gap:7px}
+.tc-card .row{display:flex;justify-content:space-between;gap:14px;padding:4px 0;font-size:.9rem;border-bottom:1px dashed var(--line-soft)}
+.tc-card .row:last-child{border-bottom:none}
+.tc-card .row b{font-variant-numeric:tabular-nums;text-align:right}
+.tc-card .row.tot{font-weight:800;font-size:1rem;border-top:1.5px solid var(--line);margin-top:4px;padding-top:8px;border-bottom:none}
+.tc-total{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow)}
+.tc-total>div{padding:16px;text-align:center}
+.tc-total .grp{background:var(--surface)}
+.tc-total .pp{background:var(--forest);color:#fff}
+:root[data-theme="dark"] .tc-total .pp{color:var(--paper)}
+.tc-total .n{font-family:var(--display);font-size:clamp(1.4rem,3vw,2rem);font-weight:700;font-variant-numeric:tabular-nums}
+.tc-total .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;opacity:.85}
+.tc-quick{height:32px;padding:0 12px;font-size:.78rem}
 
 /* ============ SAFETY ============ */
 #safety{background:var(--surface2)}
@@ -317,6 +393,38 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
 </style>
 
 <!-- ================= NAV ================= -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 8 2a6 6 0 0 0 3-.8V14a6 6 0 0 1-3 .8c-3 0-5-2-8-2a6 6 0 0 0-4 1.5"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-8a3.5 3.5 0 0 1 0-7H12"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-fuel" viewBox="0 0 24 24"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M2 22h12"/><path d="M13 10h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M4 9h8"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M5 17H3v-5l2-6h12l3 6h1v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/><path d="M5 12h14"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h2v4"/></symbol>
+<symbol id="i-bed" viewBox="0 0 24 24"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></symbol>
+<symbol id="i-mountain" viewBox="0 0 24 24"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m5 17 4-6 4 3 6-9"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-chev-u" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+<symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><path d="M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9L7.9 2Z"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0-.4-9A7 7 0 1 0 5 17.7"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3 1.1-2.2 2.6-3.4 5-4-1 2 0 3.5 1.5 5A6.5 6.5 0 1 1 5.5 14c1 .6 2 .8 3 .5Z"/></symbol>
+<symbol id="i-pack" viewBox="0 0 24 24"><path d="M9 4V3a3 3 0 0 1 6 0v1"/><rect x="4" y="4" width="16" height="18" rx="3"/><path d="M8 12h8"/><path d="M8 12v9"/><path d="M16 12v9"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2Z"/><path d="M9 3v16"/><path d="M15 5v16"/></symbol>
+<symbol id="i-tent" viewBox="0 0 24 24"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 13v8"/></symbol>
+<symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="4" r="2"/><path d="m10 22 2-7"/><path d="m14 22-2-7 2-4"/><path d="m8 12 2-3 4-1 3 3 2 1"/></symbol>
+</svg>
 <a class="skiplink" href="#map">Skip to the map and guide content</a>
 <header id="topnav">
   <div class="bar">
@@ -329,7 +437,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
       <a href="#budget" data-nav>Budget</a>
       <a href="#safety" data-nav>Safety</a>
     </nav>
-    <button id="themeBtn" title="Toggle light/dark theme" aria-label="Toggle light or dark theme">◐</button>
+    <button id="themeBtn" title="Toggle light/dark theme" aria-label="Toggle light or dark theme"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </div>
   <div id="progress" role="presentation"></div>
 </header>
@@ -373,7 +481,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
       <div class="fgroup" data-fgroup="difficulty" role="group" aria-label="Difficulty"></div>
       <div class="fgroup" data-fgroup="duration" role="group" aria-label="Duration"></div>
       <div class="fgroup" data-fgroup="type" role="group" aria-label="Track type"></div>
-      <button class="chip" id="clearFilters" type="button">✕ Clear</button>
+      <button class="chip" id="clearFilters" type="button"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg> Clear filters</button>
     </div>
 
     <div id="mapwrap" class="rv2">
@@ -425,34 +533,89 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
 <section id="budget" class="block">
   <div class="container">
     <div class="sec-head"><span class="eyebrow rv">05 — <b>Plan</b></span><span class="rule"></span></div>
-    <h2 class="rv">Budget planner</h2>
-    <p class="lede rv">A rough trip-cost estimator in New Zealand dollars. Defaults come from prices checked 16 July 2026 (DOC hut categories) and typical operator ranges — <strong>estimates, not quotes</strong>.</p>
-    <div class="panel rv2">
-      <div class="bgrid">
-        <div class="bfield"><label for="bHike">Hike</label><select id="bHike"></select></div>
-        <div class="bfield"><label for="bMode">Trip style</label>
-          <select id="bMode">
-            <option value="day">Day trip</option>
-            <option value="hut">Hut overnight</option>
-            <option value="camp">Tent camping</option>
-          </select></div>
-        <div class="bfield"><label for="bStay">Town accommodation</label>
-          <select id="bStay">
-            <option value="none">None (drive same day)</option>
-            <option value="budget">Budget (~$45/pp holiday park or hostel)</option>
-            <option value="mid">Mid-range (~$120/pp motel)</option>
-          </select></div>
-        <div class="bfield"><label for="bPeople">People</label><input id="bPeople" type="number" min="1" max="12" value="2"></div>
-        <div class="bfield"><label for="bNights">Nights away</label><input id="bNights" type="number" min="0" max="7" value="1"></div>
-        <div class="bfield"><label for="bKm">Return drive (km)</label><input id="bKm" type="number" min="0" max="2000" value="300"></div>
-        <div class="bfield"><label for="bShuttle">Shuttle / transport</label>
-          <select id="bShuttle"><option value="0">Not needed</option><option value="1">Yes (shuttle or train fare)</option></select></div>
-        <div class="bfield"><label for="bHire">Equipment hire</label>
-          <select id="bHire"><option value="0">None</option><option value="basic">Boots/pack (~$30/day pp)</option><option value="alpine">Alpine kit incl. ice axe/crampons (~$50/day pp)</option></select></div>
+    <h2 class="rv">Travel-cost calculator</h2>
+    <p class="lede rv">Estimate the road trip to any of the ten trailheads: routed driving distance and time, fuel, New Zealand Road User Charges, and shared costs per person. Every figure is editable — defaults are worked examples, not live prices.</p>
+
+    <div class="tc-grid rv2">
+      <div class="tc-inputs">
+        <div class="panel">
+          <h4><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> Trip details</h4>
+          <div class="bfield" style="position:relative">
+            <label for="tcFrom">Departing from</label>
+            <input id="tcFrom" type="text" autocomplete="off" placeholder="Street address, suburb, town or city" aria-describedby="tcFromHelp">
+            <div id="tcFromList" class="tc-suggest" role="listbox" hidden></div>
+            <div id="tcFromHelp" class="tc-hint">New Zealand locations. <button type="button" class="btn btn-ghost tc-mini" id="tcGeo"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> Use current location</button></div>
+          </div>
+          <div class="bfield">
+            <label for="tcDest">Destination (road access point)</label>
+            <select id="tcDest"></select>
+            <div class="tc-hint" id="tcDestNote"></div>
+          </div>
+          <div class="tc-row">
+            <div class="bfield">
+              <label id="tcJourneyLbl">Journey</label>
+              <div class="seg" role="group" aria-labelledby="tcJourneyLbl">
+                <button type="button" id="tcRet" aria-pressed="true">Return</button>
+                <button type="button" id="tcOne" aria-pressed="false">One-way</button>
+              </div>
+            </div>
+            <div class="bfield">
+              <label for="tcPeople">Number of people travelling</label>
+              <div class="stepper">
+                <button type="button" id="tcPeopleMinus" aria-label="One fewer traveller"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                <input id="tcPeople" type="number" inputmode="numeric" min="1" max="12" step="1" value="2">
+                <button type="button" id="tcPeoplePlus" aria-label="One more traveller"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h4><svg class="ic" aria-hidden="true"><use href="#i-car"/></svg> Vehicle &amp; fuel</h4>
+          <div class="bfield">
+            <label for="tcVehicle">Vehicle fuel or RUC type</label>
+            <select id="tcVehicle"></select>
+          </div>
+          <div class="tc-row">
+            <div class="bfield">
+              <label for="tcFuelPrice">Fuel price (NZD per litre)</label>
+              <input id="tcFuelPrice" type="number" inputmode="decimal" min="0" step="0.01" value="2.75">
+              <div class="tc-hint">Editable example — check your local pump price.</div>
+            </div>
+            <div class="bfield">
+              <label for="tcCons">Fuel consumption (L / 100 km)</label>
+              <input id="tcCons" type="number" inputmode="decimal" min="0" step="0.1" value="8.0">
+              <div class="tc-hint">Editable example — use your vehicle's figure.</div>
+            </div>
+          </div>
+          <div id="tcRucBlock" class="tc-ruc"></div>
+        </div>
+
+        <div class="panel">
+          <h4><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg> Optional additional costs</h4>
+          <div id="tcExtras"></div>
+          <div class="tc-actions" style="margin-top:10px">
+            <button type="button" class="btn btn-secondary" id="tcAddCost"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Add a cost</button>
+            <span id="tcQuick"></span>
+          </div>
+          <p class="tc-hint" style="margin-top:8px">Shared = split between all travellers · Vehicle/group = counted once, not split in the per-person figure · Per person = charged to each traveller.</p>
+        </div>
+
+        <div class="tc-actions">
+          <button type="button" class="btn btn-primary" id="tcGo"><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg> Calculate route &amp; costs</button>
+          <button type="button" class="btn btn-secondary" id="tcReset"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg> Reset</button>
+        </div>
+        <div id="tcStatus" role="status" aria-live="polite"></div>
       </div>
-      <div id="budgetOut" aria-live="polite"></div>
-      <p class="bdisc">Fuel assumed at ~9&nbsp;L/100&nbsp;km and $2.75/L (NZ average, checked 16 Jul 2026 — varies by region and vehicle). Food allowance $25/pp per day-hike day, $40/pp per overnight day. Hut and campsite fees use DOC categories current from 1 July 2026; verify the exact hut on <a href="https://bookings.doc.govt.nz" target="_blank" rel="noopener">bookings.doc.govt.nz</a>. Shuttle fares vary by operator and season. Nothing here is a guaranteed price.</p>
+
+      <div class="tc-results">
+        <div id="tcResults" aria-live="polite">
+          <div class="panel tc-placeholder">Enter a departure location, choose a hike and select <b>Calculate route &amp; costs</b>. Routing uses road distance, never straight-line distance.</div>
+        </div>
+      </div>
     </div>
+
+    <p class="bdisc rv">“New Zealand RUC is generally purchased in distance licences measured in 1,000 km units. This calculator estimates the portion of the applicable RUC rate attributable to this journey. It does not confirm whether a vehicle has sufficient prepaid RUC distance or calculate every possible licence transaction fee.” “RUC rates depend on the vehicle’s official classification. Confirm the vehicle details and current NZTA rate before relying on this estimate.” This is not an official NZTA calculator. RUC rates last checked: <b>17 Jul 2026</b> — <a href="https://www.nzta.govt.nz/vehicles/road-user-charges/" target="_blank" rel="noopener">official NZTA RUC information <svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg></a>. Routing and geocoding by OSRM &amp; Photon (OpenStreetMap-based); driving times are estimates and results are approximate.</p>
   </div>
 </section>
 
@@ -463,12 +626,12 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
     <h2 class="rv">Before every walk</h2>
     <p class="lede rv">Based on the NZ Mountain Safety Council’s Land Safety Code and DOC guidance. This website is a planning aid — it does not replace official track information, current forecasts, or your own preparation and judgement.</p>
     <div class="safegrid">
-      <div class="safecard rv"><h4>⛅ 1 · Choose the right trip</h4><p>Match the track to the least experienced person in your group. Winter (roughly May–October) turns Tongariro, Tama Lakes, Kime and Powell into alpine trips needing ice axe, crampons and the skills to use them.</p></div>
-      <div class="safecard rv"><h4>🌧 2 · Understand the weather</h4><p>Check the <a href="https://www.metservice.com" target="_blank" rel="noopener">MetService</a> mountain/national-park forecast the day before <em>and</em> the morning of your walk. NZ alpine weather changes in minutes; if a severe watch or warning is issued, change your plan.</p></div>
-      <div class="safecard rv"><h4>🎒 3 · Pack warm clothes + extra food</h4><p>Waterproof shell, warm insulating layers (no cotton), hat and gloves, headtorch, first aid, survival bag, and a day’s spare food — on every track graded moderate or harder in this guide.</p></div>
-      <div class="safecard rv"><h4>📍 4 · Share your plans + take ways to get help</h4><p>Leave trip intentions with a trusted contact (use <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> or AdventureSmart). Carry a charged phone <em>and</em> a distress beacon (PLB) where coverage is patchy — most of these tracks have dead zones.</p></div>
-      <div class="safecard rv"><h4>🥾 5 · Take care of yourself and your group</h4><p>Eat, drink, and check each other. Set a turnaround time and honour it — summits and tarns will still be there next weekend. Rivers: if you can’t see the bottom or it’s above your knees, don’t cross; wait or turn back.</p></div>
-      <div class="safecard rv"><h4>🔥 Alerts, fires &amp; closures</h4><ul><li>Check <a href="https://www.doc.govt.nz/parks-and-recreation/know-before-you-go/alerts/" target="_blank" rel="noopener">DOC alerts</a> and <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> the week you travel.</li><li>Check <a href="https://www.checkitsalright.nz" target="_blank" rel="noopener">fire season status</a> before any camp stove use outdoors.</li><li>Respect rāhui and cultural restrictions — currently relevant at Tongariro.</li></ul></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg> 1 · Choose the right trip</h4><p>Match the track to the least experienced person in your group. Winter (roughly May–October) turns Tongariro, Tama Lakes, Kime and Powell into alpine trips needing ice axe, crampons and the skills to use them.</p></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg> 2 · Understand the weather</h4><p>Check the <a href="https://www.metservice.com" target="_blank" rel="noopener">MetService</a> mountain/national-park forecast the day before <em>and</em> the morning of your walk. NZ alpine weather changes in minutes; if a severe watch or warning is issued, change your plan.</p></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-pack"/></svg> 3 · Pack warm clothes + extra food</h4><p>Waterproof shell, warm insulating layers (no cotton), hat and gloves, headtorch, first aid, survival bag, and a day’s spare food — on every track graded moderate or harder in this guide.</p></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> 4 · Share your plans + take ways to get help</h4><p>Leave trip intentions with a trusted contact (use <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> or AdventureSmart). Carry a charged phone <em>and</em> a distress beacon (PLB) where coverage is patchy — most of these tracks have dead zones.</p></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-walk"/></svg> 5 · Take care of yourself and your group</h4><p>Eat, drink, and check each other. Set a turnaround time and honour it — summits and tarns will still be there next weekend. Rivers: if you can’t see the bottom or it’s above your knees, don’t cross; wait or turn back.</p></div>
+      <div class="safecard rv"><h4><svg class="ic" aria-hidden="true"><use href="#i-flame"/></svg> Alerts, fires &amp; closures</h4><ul><li>Check <a href="https://www.doc.govt.nz/parks-and-recreation/know-before-you-go/alerts/" target="_blank" rel="noopener">DOC alerts</a> and <a href="https://planmywalk.nz" target="_blank" rel="noopener">Plan My Walk</a> the week you travel.</li><li>Check <a href="https://www.checkitsalright.nz" target="_blank" rel="noopener">fire season status</a> before any camp stove use outdoors.</li><li>Respect rāhui and cultural restrictions — currently relevant at Tongariro.</li></ul></div>
     </div>
     <div class="emg rv">
       <b>Emergency: dial 111 and ask for Police</b> — they coordinate land search and rescue in New Zealand. No signal? Activate your PLB / satellite messenger SOS. Text 111 works only if pre-registered. For volcanic activity levels see <a href="https://www.geonet.org.nz" target="_blank" rel="noopener">GeoNet</a>.
@@ -495,7 +658,7 @@ footer .cols{display:flex;gap:40px;flex-wrap:wrap}
     </div>
   </div>
 </footer>
-<button class="backtop" id="backtop" aria-label="Back to top">↑</button>
+<button class="backtop" id="backtop" aria-label="Back to top"><svg class="ic" aria-hidden="true"><use href="#i-chev-u"/></svg></button>
 <script>
 "use strict";
 /* ==================== DATA ==================== */
@@ -1280,17 +1443,6 @@ pull:"Sunrise from the hut deck sweeps the whole Wairarapa plain to the Pacific 
 ];
 const DIFFKEY={tongariro:"alp","dukes-nose":"adv",pouakai:"mod",kime:"alp",tama:"mod",mercer:"easy",escarpment:"mod",deliverance:"easy",wairere:"mod",powell:"adv"};
 const TYPEKEY={tongariro:"point","dukes-nose":"return",pouakai:"return",kime:"overnight",tama:"return",mercer:"loop",escarpment:"point",deliverance:"return",wairere:"return",powell:"overnight"};
-const BUDGET_DEF={
- tongariro:{km:340,shuttle:55,hut:0,camp:15,hire:"alpine"},
- "dukes-nose":{km:520,shuttle:50,hut:28,camp:0,hire:"basic"},
- pouakai:{km:360,shuttle:0,hut:25,camp:0,hire:"basic"},
- kime:{km:150,shuttle:0,hut:15,camp:0,hire:"alpine"},
- tama:{km:340,shuttle:0,hut:0,camp:15,hire:"basic"},
- mercer:{km:80,shuttle:0,hut:0,camp:0,hire:"0"},
- escarpment:{km:100,shuttle:8,hut:0,camp:0,hire:"0"},
- deliverance:{km:180,shuttle:0,hut:0,camp:0,hire:"0"},
- wairere:{km:160,shuttle:0,hut:0,camp:0,hire:"0"},
- powell:{km:140,shuttle:0,hut:28,camp:15,hire:"basic"}};
 const CMP_EXTRA={
  tongariro:{alpine:"High",hut:"No (circuit huts nearby)",camp:"Nearby (Mangahuia)",cost:"$45–60 shuttle",season:"Nov–Apr",light:"Red Crater & Emerald Lakes",pop:"Very high"},
  "dukes-nose":{alpine:"None (exposed rock)",hut:"Lane Cove (book)",camp:"No",cost:"$0–28 hut",season:"Dry spells, summer",light:"Whangaroa summit panorama",pop:"Moderate"},
@@ -1307,8 +1459,8 @@ const CMP_EXTRA={
 const $=(s,el)=>(el||document).querySelector(s), $$=(s,el)=>Array.from((el||document).querySelectorAll(s));
 const REDUCED=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-function diffBadge(k){const d=DIFF[k];return `<span class="badge ${d.cls}">▲ ${d.label}</span>`}
-function statusBadge(st){const cls=st.level==="open"?"b-open":st.level==="part"?"b-part":"b-closed";const dot=st.level==="open"?"●":"◐";return `<span class="badge ${cls}">${dot} ${esc(st.label)}</span>`}
+function diffBadge(k){const d=DIFF[k];return `<span class="badge ${d.cls}"><svg class="ic" aria-hidden="true"><use href="#i-mountain"/></svg> ${d.label}</span>`}
+function statusBadge(st){const cls=st.level==="open"?"b-open":st.level==="part"?"b-part":"b-closed";const ic=st.level==="open"?"check":st.level==="part"?"alert":"stop";return `<span class="badge ${cls}"><svg class="ic" aria-hidden="true"><use href="#i-${ic}"/></svg> ${esc(st.label)}</span>`}
 
 /* ---- card art: layered ridge illustration per terrain ---- */
 function cardArt(t,seed){
@@ -1540,8 +1692,8 @@ function kv(label,val){return `<tr><th style="width:38%">${label}</th><td>${val}
 function renderHikes(){
  $("#hikes").innerHTML=HIKES.map(h=>{
   const words=h.name.split(" ").map((w,i)=>`<span class="hw" style="--i:${i}">${esc(w)}</span>`).join(" ");
-  const alertHtml=h.status.level==="open"?"":`<div class="alertbar ${h.status.level==="closed"?"bad":"warn"}"><span class="ic">${h.status.level==="closed"?"⛔":"⚠️"}</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`;
-  const okNote=h.status.level==="open"?`<div class="alertbar warn" style="background:var(--chip-easy);border-color:var(--good);border-color:color-mix(in srgb,var(--good) 35%,transparent)"><span class="ic">✅</span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`:"";
+  const alertHtml=h.status.level==="open"?"":`<div class="alertbar ${h.status.level==="closed"?"bad":"warn"}"><span class="alic"><svg class="ic lg" aria-hidden="true"><use href="#i-${h.status.level==="closed"?"stop":"alert"}"/></svg></span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`;
+  const okNote=h.status.level==="open"?`<div class="alertbar warn" style="background:var(--chip-easy);border-color:var(--good);border-color:color-mix(in srgb,var(--good) 35%,transparent)"><span class="alic"><svg class="ic lg" aria-hidden="true"><use href="#i-check"/></svg></span><div><b>${esc(h.status.label)}.</b> ${esc(h.status.text)} <em>(Checked ${CHECKED}.)</em></div></div>`:"";
   const e=h.essentials;
   return `<section class="hike block" id="hike-${h.id}" data-hike="${h.id}">
    <div class="region-water" aria-hidden="true">${REGIONS[h.region]}</div>
@@ -1549,7 +1701,7 @@ function renderHikes(){
     <span class="idx">${h.num} / 10 — ${REGIONS[h.region].toUpperCase()}</span>
     <h2 class="tname">${words}</h2>
     <p class="tagline">${esc(h.tagline)}</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}<span class="badge b-mod">🥾 ${esc(h.type)}</span>${h.overnight?'<span class="badge b-adv">🌙 Overnight</span>':""}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${diffBadge(DIFFKEY[h.id])}${statusBadge(h.status)}<span class="badge b-mod"><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg> ${esc(h.type)}</span>${h.overnight?'<span class="badge b-adv"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg> Overnight</span>':""}</div>
     ${alertHtml||okNote}
     ${PHOTOS[h.id]?`<figure class="hikephoto rv2"><img loading="lazy" class="${PHOTOS[h.id].fit?"fit-contain":""}" src="${PHOTOS[h.id].src}" alt="${esc(PHOTOS[h.id].cap)}"><figcaption>${esc(PHOTOS[h.id].cap)} — photo: ${esc(PHOTOS[h.id].credit)}, <a href="${PHOTOS[h.id].page}" target="_blank" rel="noopener">${PHOTOS[h.id].lic} via Wikimedia Commons</a></figcaption></figure>`:""}
     <div class="statgrid">
@@ -1562,12 +1714,12 @@ function renderHikes(){
 
     <div class="duo">
      <div class="panel routemap rv2">
-      <h4>🗺 Route map <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— official track line; still carry the paper map</span></h4>
+      <h4><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg> Route map <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— official track line; still carry the paper map</span></h4>
       <div class="minimap" id="mm-${h.id}" role="application" aria-label="Interactive map of the ${esc(h.name)} route"></div>
       <p class="cap"><b>Track line:</b> ${GEOSRC[h.id]}. <b>Key waypoints along the way:</b> ${h.route.pois.map(p=>esc(p[2])).join(" · ")}. ${esc(h.route.caption)}${h.route.closed?" Closed sections are described in the alert above — the line shown may include currently closed track.":""}</p>
      </div>
      <div class="panel elev rv2">
-      <h4>⛰ Elevation profile <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— approximate</span></h4>
+      <h4><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg> Elevation profile <span style="font-weight:400;font-size:.72rem;color:var(--ink3)">— approximate</span></h4>
       ${buildElevSvg(h)}
       <p class="cap">Touch or hover the chart — the blue dot on the route map tracks the same spot (position along the official line is approximate). ${h.elevNote?esc(h.elevNote):""}</p>
      </div>
@@ -1583,7 +1735,7 @@ function renderHikes(){
      <div class="gear"><h5>Sunrise / sunset</h5><ul><li>${esc(h.features.sun)}</li></ul></div>
     </div>
 
-    <details class="x rv"><summary>📋 Essential track details<span class="chev">▾</span></summary><div class="dx"><table>
+    <details class="x rv"><summary><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Essential track details<span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx"><table>
      ${kv("Official name",esc(h.name))}${kv("Region",REGIONS[h.region])}${kv("Nearest town",esc(h.town))}
      ${kv("Trailhead / access",esc(e.trailhead))}${kv("Track type",esc(h.type))}${kv("Surface & terrain",esc(e.surface))}
      ${kv("Best seasons",esc(e.seasons))}${kv("Weather exposure",esc(e.exposure))}${kv("Fitness & experience",esc(e.fitness))}
@@ -1591,25 +1743,26 @@ function renderHikes(){
      ${kv("Water",esc(e.water))}${kv("Emergency & turnaround",esc(e.emergency))}
     </table></div></details>
 
-    <details class="x rv"><summary>🥾 Track options &amp; routes<span class="chev">▾</span></summary><div class="dx"><div class="optlist">
+    <details class="x rv"><summary><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg> Track options &amp; routes<span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx"><div class="optlist">
      ${h.options.map((o,i)=>`<div class="opt ${i===0?"rec":""}"><span class="otag">${esc(o.tag)}</span><h5>${esc(o.name)}</h5>
       <div class="ometa">${o.dir?`<span><b>Direction:</b> ${esc(o.dir)}</span>`:""}${Object.entries(o.meta||{}).filter(([,v])=>v).map(([k,v])=>`<span><b>${{dist:"Distance",time:"Time",elev:"Elevation",diff:"Difficulty",kind:""}[k]||k}${k==="kind"?"":":"}</b> ${esc(v)}</span>`).join("")}</div>
       <p class="why">${esc(o.why)}</p>${o.needs?`<p class="why" style="color:var(--ink3)"><b>Needs:</b> ${esc(o.needs)}</p>`:""}</div>`).join("")}
     </div></div></details>
 
-    <details class="x rv"><summary>🕐 Suggested itinerary <span style="font-weight:400;color:var(--ink3)">(times approximate)</span><span class="chev">▾</span></summary><div class="dx">
+    <details class="x rv"><summary><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg> Suggested itinerary <span style="font-weight:400;color:var(--ink3)">(times approximate)</span><span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx">
      <p style="margin-top:8px"><b>${esc(h.itinerary.title)}</b></p>
      <table>${h.itinerary.rows.map(r=>`<tr><th style="white-space:nowrap;width:110px">${esc(r[0])}</th><td>${esc(r[1])}</td></tr>`).join("")}</table></div></details>
 
-    <details class="x rv"><summary>🎒 Gear checklist<span class="chev">▾</span></summary><div class="dx">
+    <details class="x rv"><summary><svg class="ic" aria-hidden="true"><use href="#i-pack"/></svg> Gear checklist<span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx">
      <div class="gearcols">${h.gear.groups.map(g=>`<div class="gear"><h5>${esc(g[0])}</h5><ul>${g[1].map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>
-     <div class="gwarn">⚠️ ${esc(h.gear.warn)}</div></div></details>
+     <div class="gwarn"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> ${esc(h.gear.warn)}</div></div></details>
 
-    <details class="x rv"><summary>🛏 Accommodation &amp; costs<span class="chev">▾</span></summary><div class="dx">
+    <details class="x rv"><summary><svg class="ic" aria-hidden="true"><use href="#i-bed"/></svg> Accommodation &amp; costs<span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx">
      <table>${h.accom.map(a=>`<tr><th>${esc(a[0])}</th><td>${esc(a[1])}<br><em style="color:var(--ink3)">${esc(a[2])}</em></td></tr>`).join("")}</table>
      <p style="margin-top:14px"><b>Costs (NZD, per adult unless noted)</b></p>
      <table>${h.costs.map(c=>`<tr><th>${esc(c[0])}</th><td class="num">${esc(c[1])}</td><td style="color:var(--ink3);font-size:.76rem;white-space:nowrap">${esc(c[2])}</td></tr>`).join("")}</table>
-     <p style="font-size:.76rem;color:var(--ink3)">Fees vary by season, age and booking type; DOC updated hut fees on 1 July 2026. Always confirm on the linked official pages.</p></div></details>
+     <p style="font-size:.76rem;color:var(--ink3)">Fees vary by season, age and booking type; DOC updated hut fees on 1 July 2026. Always confirm on the linked official pages.</p>
+     <p><a class="btn btn-secondary" href="#budget" data-tcdest="${h.id}"><svg class="ic" aria-hidden="true"><use href="#i-car"/></svg> Estimate travel costs to this trailhead</a></p></div></details>
 
     <h3 class="rv" style="margin-top:34px">Alternative &amp; nearby tracks</h3>
     <p class="rv" style="font-size:.9rem;color:var(--ink2)">Ranked by relevance — the most recommended alternative first.</p>
@@ -1631,32 +1784,369 @@ function renderHikes(){
  $("#hikenavRail").innerHTML=HIKES.map(h=>`<a href="#hike-${h.id}" data-hikelink="${h.id}">${h.num} ${esc(h.short)}</a>`).join("");
 }
 
-/* ==================== BUDGET ==================== */
-function buildBudget(){
- $("#bHike").innerHTML=HIKES.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join("");
- const els=["bHike","bMode","bStay","bPeople","bNights","bKm","bShuttle","bHire"].map(id=>$("#"+id));
- $("#bHike").addEventListener("change",()=>{const d=BUDGET_DEF[$("#bHike").value];$("#bKm").value=d.km;$("#bShuttle").value=d.shuttle&&d.shuttle>10?"1":"0";$("#bMode").value=d.hut?"hut":"day";$("#bHire").value="0";calcBudget()});
- els.forEach(el=>el.addEventListener("input",calcBudget));
- calcBudget()}
-function calcBudget(){
- const id=$("#bHike").value,d=BUDGET_DEF[id],h=HIKES.find(x=>x.id===id);
- const mode=$("#bMode").value,stay=$("#bStay").value;
- const ppl=Math.max(1,+$("#bPeople").value||1),nights=Math.max(0,+$("#bNights").value||0),km=Math.max(0,+$("#bKm").value||0);
- const nightsEff=(mode==="day")?nights:Math.max(1,nights);
- const rows=[];let total=0;const add=(l,v)=>{if(v>0){rows.push([l,v]);total+=v}};
- add("Fuel (~9 L/100 km @ $2.75/L)",Math.round(km*0.09*2.75));
- if(mode==="hut")add(`Hut fees (${nightsEff} night${nightsEff>1?"s":""} × ${ppl})`,(d.hut||20)*nightsEff*ppl);
- if(mode==="camp")add(`Campsite fees (${nightsEff} × ${ppl})`,(d.camp||15)*nightsEff*ppl);
- if(stay==="budget")add(`Town accommodation — budget (${nightsEff} × ${ppl})`,45*nightsEff*ppl);
- if(stay==="mid")add(`Town accommodation — mid-range (${nightsEff} × ${ppl})`,120*nightsEff*ppl);
- if($("#bShuttle").value==="1")add(`Shuttle / transport (${ppl} pp)`,(d.shuttle||45)*ppl);
- const days=Math.max(1,nightsEff+1);
- add(`Food (${days} day${days>1?"s":""} × ${ppl})`,(mode==="day"?25:40)*days*ppl);
- const hire=$("#bHire").value;if(hire==="basic")add("Equipment hire — basic",30*days*ppl);if(hire==="alpine")add("Equipment hire — alpine kit",50*days*ppl);
- const lo=Math.round(total*0.85/5)*5, hi=Math.round(total*1.25/5)*5;
- $("#budgetOut").innerHTML=`<div class="big num">$${lo} – $${hi} <span style="font-size:.45em;color:var(--ink3);font-family:var(--body)">NZD estimated range · ${esc(h.short)}</span></div>
-  <table>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="num">$${r[1]}</td></tr>`).join("")}<tr><td><b>Working total</b></td><td class="num"><b>$${total}</b></td></tr></table>`}
+/* ==================== TRAVEL-COST CALCULATOR ==================== */
+/* RUC data: single source of truth. Official rates from NZ Transport Agency Waka Kotahi
+   (nzta.govt.nz/vehicles/road-user-charges/). GST-inclusive, per 1,000 km. */
+const RUC_META={checked:"17 Jul 2026",src:"https://www.nzta.govt.nz/vehicles/road-user-charges/",
+ calc:"https://www.nzta.govt.nz/vehicles/road-user-charges/ruc-rates-and-transaction-fees/"};
+const RUC_CONFIG={
+ petrol:{label:"Petrol vehicle",ruc:false,fuel:true,
+  note:"No separate RUC applies — petrol vehicles contribute to road funding through fuel excise duty included in the pump price."},
+ "petrol-hybrid":{label:"Petrol hybrid (not plug-in)",ruc:false,fuel:true,
+  note:"No separate RUC applies — contributes through petrol excise duty."},
+ diesel:{label:"Light diesel vehicle",ruc:true,cat:"RUC vehicle type 1 (light, ≤ 3,500 kg)",rate:76.00,fuel:true,effective:"current rate",official:true},
+ ev:{label:"Fully electric light vehicle",ruc:true,cat:"RUC vehicle type 1 (light, ≤ 3,500 kg)",rate:76.00,fuel:false,effective:"light EVs pay RUC since 1 Apr 2024",official:true},
+ "phev-petrol":{label:"Plug-in petrol hybrid",ruc:true,cat:"RUC vehicle type 12 (PHEV 1,001–3,500 kg, reduced rate)",rate:38.00,fuel:true,effective:"since 1 Apr 2024",official:true},
+ "phev-diesel":{label:"Plug-in diesel hybrid",ruc:true,cat:"RUC vehicle type 1 (light, ≤ 3,500 kg)",rate:76.00,fuel:true,effective:"current rate",official:true},
+ "diesel-hybrid":{label:"Diesel hybrid (not plug-in)",ruc:true,cat:"RUC vehicle type 1 (light, ≤ 3,500 kg)",rate:76.00,fuel:true,effective:"current rate",official:true},
+ heavy:{label:"Heavy vehicle (over 3,500 kg)",ruc:"manual",fuel:true,
+  note:"Heavy-vehicle RUC rates depend on vehicle type, axle configuration and RUC weight. Confirm the applicable rate using the official NZTA RUC calculator."},
+ custom:{label:"Custom RUC rate",ruc:"custom",fuel:true}
+};
+/* Road-access destinations taken from the official track geometry already on this site (DOC CC-BY 4.0 / OSM ODbL). */
+const ACCESS={
+ tongariro:{ll:[-39.1445,175.5810],name:"Mangatepōpō Road end car park"},
+ tama:{ll:[-39.1996,175.5430],name:"Whakapapa Village (track entrance, Ngauruhoe Place)"},
+ pouakai:{ll:[-39.2048,174.0531],name:"Mangorei Road end car park"},
+ "dukes-nose":{ll:[-35.0383,173.7196],name:"Campbell Road track entrance, Totara North"},
+ wairere:{ll:[-37.7373,175.8628],name:"Goodwin Road car park"},
+ kime:{ll:[-40.8761,175.2346],name:"Ōtaki Forks road end — slip detour applies, check current parking"},
+ powell:{ll:[-40.9037,175.4677],name:"Holdsworth road end"},
+ escarpment:{ll:[-41.0029,174.9361],name:"Paekākāriki Railway Station end of the track"},
+ mercer:{ll:[-36.9700,174.4678],name:"Log Race Road car park"},
+ deliverance:{ll:[-40.9026,176.2275],name:"Castlepoint Scenic Reserve car park"}
+};
+const QUICK_COSTS={
+ tongariro:[["Crossing shuttle (typical fare)",55,"perperson"]],
+ escarpment:[["Train fare back to start (Metlink)",8,"perperson"]],
+ powell:[["Powell Hut booking",28,"perperson"]],
+ pouakai:[["Pouākai Hut booking",25,"perperson"]],
+ "dukes-nose":[["Lane Cove Hut booking",28,"perperson"]]
+};
+const NZD=new Intl.NumberFormat("en-NZ",{style:"currency",currency:"NZD"});
+const TC={from:null,route:null,manualKm:null,recents:[]};
 
+/* ---- central calculation layer (pure) ---- */
+function computeTripCosts(i){
+ const totalKm=i.oneWayKm*(i.retn?2:1);
+ const litres=i.fuelApplies?totalKm*i.cons/100:0;
+ const fuelCost=litres*i.fuelPrice;
+ const rucPerKm=(i.rucRate||0)/1000;
+ const rucCost=i.rucOn?totalKm*rucPerKm:0;
+ let sharedExtras=0,vehicleExtras=0,ppExtras=0;
+ i.extras.forEach(e=>{if(e.type==="shared")sharedExtras+=e.amt;else if(e.type==="vehicle")vehicleExtras+=e.amt;else ppExtras+=e.amt});
+ const sharedTotal=fuelCost+rucCost+sharedExtras;
+ const groupTotal=sharedTotal+vehicleExtras+ppExtras*i.people;
+ const perPerson=sharedTotal/i.people+ppExtras;
+ return{totalKm,litres,fuelCost,rucPerKm,rucCost,sharedExtras,vehicleExtras,ppExtras,sharedTotal,groupTotal,perPerson,
+  fuelPerPerson:fuelCost/i.people,rucPerPerson:rucCost/i.people};
+}
+
+/* ---- geocoding (Photon, OpenStreetMap-based, keyless) ---- */
+async function geocodeNZ(q){
+ const u="https://photon.komoot.io/api/?limit=5&lang=en&bbox=166,-47.6,179,-34&q="+encodeURIComponent(q);
+ const r=await fetch(u);if(!r.ok)throw new Error("geocode-http");
+ const j=await r.json();
+ return (j.features||[]).map(f=>{const p=f.properties;
+  const label=[p.name,p.street,p.district,p.city,p.state].filter(Boolean).filter((v,ix,a)=>a.indexOf(v)===ix).join(", ");
+  return{label:label||p.name||q,ll:[f.geometry.coordinates[1],f.geometry.coordinates[0]]}});
+}
+/* ---- routing (OSRM public demo, keyless). Road distance only — never straight-line. ---- */
+async function routeDrive(a,b){
+ const u=`https://router.project-osrm.org/route/v1/driving/${a[1]},${a[0]};${b[1]},${b[0]}?overview=false&alternatives=false&steps=true`;
+ const r=await fetch(u);if(!r.ok)throw new Error("routing-http");
+ const j=await r.json();
+ if(j.code!=="Ok"||!j.routes||!j.routes.length)throw new Error("no-route");
+ const snaps=(j.waypoints||[]).map(w=>w.distance||0);
+ if(snaps[0]>5000)throw new Error("from-not-road");
+ if(snaps[1]>5000)throw new Error("dest-not-road");
+ const rt=j.routes[0];
+ const ferry=(rt.legs||[]).some(l=>(l.steps||[]).some(st=>st.mode==="ferry"));
+ return{km:rt.distance/1000,min:rt.duration/60,ferry};
+}
+
+function tcStatus(html){$("#tcStatus").innerHTML=html}
+function tcErr(msg){return `<div class="err"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span>${msg}</span></div>`}
+
+function tcState(){
+ const dest=$("#tcDest").value;
+ return{
+  dest,vehicle:$("#tcVehicle").value,
+  retn:$("#tcRet").getAttribute("aria-pressed")==="true",
+  people:$("#tcPeople").value,fuelPrice:$("#tcFuelPrice").value,cons:$("#tcCons").value,
+  rucOn:$("#tcRucOn")?$("#tcRucOn").checked:true,
+  customRate:$("#tcRucCustom")?$("#tcRucCustom").value:"",
+  heavyRate:$("#tcHeavyRate")?$("#tcHeavyRate").value:""
+ };
+}
+function tcPersist(){try{const st=tcState();st.fromLabel=TC.from?TC.from.label:"";st.fromLL=TC.from?TC.from.ll:null;st.recents=TC.recents;sessionStorage.setItem("tc",JSON.stringify(st))}catch(e){}}
+function tcValidate(st,cfg){
+ const errs=[];
+ if(!TC.from)errs.push("Enter a departure location, or use your current location.");
+ const ppl=Number(st.people);
+ if(st.people===""||!Number.isFinite(ppl)||ppl<1)errs.push("Enter at least one traveller.");
+ else if(!Number.isInteger(ppl))errs.push("Travellers must be a whole number.");
+ const fp=Number(st.fuelPrice);
+ if(cfg.fuel&&(st.fuelPrice===""||!Number.isFinite(fp)||fp<0))errs.push("Enter a valid fuel price.");
+ const cn=Number(st.cons);
+ if(cfg.fuel&&(st.cons===""||!Number.isFinite(cn)||cn<0))errs.push("Enter a valid fuel-consumption rate.");
+ if(cfg.ruc==="custom"){const cr=Number(st.customRate);if(st.customRate===""||!Number.isFinite(cr)||cr<0)errs.push("The custom RUC rate must be zero or greater.")}
+ if(cfg.ruc==="manual"&&st.rucOn){const hr=Number(st.heavyRate);if(st.heavyRate===""||!Number.isFinite(hr)||hr<0)errs.push("Enter the confirmed heavy-vehicle RUC rate (NZD per 1,000 km) from the official NZTA calculator, or exclude RUC.")}
+ $$("#tcExtras .tc-extra").forEach(row=>{
+  const d=row.querySelector(".xd").value.trim(),a=Number(row.querySelector(".xa").value);
+  if(!d||!Number.isFinite(a)||a<=0)errs.push("Enter a description and amount for the additional cost.");
+ });
+ return errs;
+}
+function tcExtrasList(){
+ const seen=new Set(),out=[];
+ $$("#tcExtras .tc-extra").forEach(row=>{
+  const d=row.querySelector(".xd").value.trim(),a=Number(row.querySelector(".xa").value),t=row.querySelector(".xt").value;
+  const key=d.toLowerCase()+"|"+a+"|"+t;
+  if(d&&Number.isFinite(a)&&a>0&&!seen.has(key)){seen.add(key);out.push({desc:d,amt:a,type:t})}
+ });
+ return out;
+}
+function currentRuc(st,cfg){
+ if(cfg.ruc===true)return{rate:cfg.rate,official:true,label:cfg.cat};
+ if(cfg.ruc==="custom")return{rate:Number(st.customRate)||0,official:false,label:"Custom rate (user-entered)"};
+ if(cfg.ruc==="manual")return{rate:Number(st.heavyRate)||0,official:false,label:"Heavy vehicle (rate entered manually — confirm with NZTA)"};
+ return{rate:0,official:false,label:"No RUC applies"};
+}
+
+function updateRucUI(){
+ const key=$("#tcVehicle").value,cfg=RUC_CONFIG[key];
+ const saved=(()=>{try{return JSON.parse(sessionStorage.getItem("tc")||"{}")}catch(e){return{}}})();
+ let h="";
+ if(cfg.ruc===false){
+  h=`<div class="rc-row"><span>Road User Charges</span><b>Not applicable</b></div><p class="tc-hint">${cfg.note}</p>`;
+ }else if(cfg.ruc===true){
+  h=`<div class="rc-row"><span>RUC category</span><b>${cfg.cat}</b></div>
+     <div class="rc-row"><span>Official rate</span><b>${NZD.format(cfg.rate)} / 1,000 km</b></div>
+     <div class="rc-row"><span>Equivalent per km</span><b>${NZD.format(cfg.rate/1000)}</b></div>
+     <label class="tc-check"><input type="checkbox" id="tcRucOn" checked> Include RUC in this estimate</label>
+     <div id="tcRucWarn"></div>
+     <p class="tc-hint">${cfg.effective}. Official NZTA rate, GST inclusive — last checked ${RUC_META.checked}. <a href="${RUC_META.src}" target="_blank" rel="noopener">NZTA RUC information <svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg></a></p>`;
+ }else if(cfg.ruc==="custom"){
+  h=`<div class="bfield"><label for="tcRucCustom">RUC rate — NZD per 1,000 km</label>
+     <input id="tcRucCustom" type="number" inputmode="decimal" min="0" step="0.01" value="${saved.customRate||""}" placeholder="e.g. 76.00">
+     <div class="tc-hint" id="tcCustomHint">User-entered rate — not an official NZTA rate. Per-km equivalent shown in the results.</div></div>
+     <label class="tc-check"><input type="checkbox" id="tcRucOn" checked> Include RUC in this estimate</label><div id="tcRucWarn"></div>`;
+ }else{ /* heavy */
+  h=`<p class="tc-hint" style="margin-top:0">${cfg.note}</p>
+     <div class="tc-row">
+      <div class="bfield"><label for="tcHeavyType">RUC vehicle type</label><input id="tcHeavyType" type="text" placeholder="e.g. type 2"></div>
+      <div class="bfield"><label for="tcHeavyWeight">RUC weight (kg)</label><input id="tcHeavyWeight" type="number" min="3501" placeholder="e.g. 6000"></div>
+     </div>
+     <div class="tc-row">
+      <div class="bfield"><label for="tcHeavyAxles">Axle configuration</label><input id="tcHeavyAxles" type="text" placeholder="e.g. 2 axles"></div>
+      <div class="bfield"><label for="tcHeavyPowered">Powered or unpowered</label><select id="tcHeavyPowered"><option>Powered</option><option>Unpowered (trailer)</option></select></div>
+     </div>
+     <div class="bfield"><label for="tcHeavyRate">Confirmed RUC rate — NZD per 1,000 km</label>
+     <input id="tcHeavyRate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="From the official NZTA calculator">
+     <div class="tc-hint">Rate entered manually — look it up with the <a href="${RUC_META.calc}" target="_blank" rel="noopener">official NZTA RUC rates and calculator <svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg></a>.</div></div>
+     <label class="tc-check"><input type="checkbox" id="tcRucOn" checked> Include RUC in this estimate</label><div id="tcRucWarn"></div>`;
+ }
+ $("#tcRucBlock").innerHTML=h;
+ const on=$("#tcRucOn");
+ if(on)on.addEventListener("change",()=>{
+  $("#tcRucWarn").innerHTML=on.checked?"":`<div class="tc-warn"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> RUC has been excluded from this estimate. The total travel cost may therefore be understated.</div>`;
+  tcCalc(true);
+ });
+ const cust=$("#tcRucCustom");
+ if(cust)cust.addEventListener("input",()=>{
+  const v=Number(cust.value);
+  $("#tcCustomHint").innerHTML=(Number.isFinite(v)&&v>=0)
+   ?`User-entered rate (${NZD.format(v/1000)} per km) — not an official NZTA rate.${Math.abs(v-76)>0.005&&v!==0?" Note: differs from the official light-vehicle rate of $76.00 / 1,000 km.":""}`
+   :"User-entered rate — not an official NZTA rate.";
+  tcCalc(true);
+ });
+ const hr=$("#tcHeavyRate");if(hr)hr.addEventListener("input",()=>tcCalc(true));
+}
+
+function extraRow(desc,amt,type){
+ const row=document.createElement("div");row.className="tc-extra";
+ row.innerHTML=`<input class="xd" type="text" placeholder="Description (e.g. ferry, parking)" aria-label="Additional cost description" value="${esc(desc||"")}">
+ <input class="xa" type="number" inputmode="decimal" min="0" step="0.01" placeholder="NZD" aria-label="Additional cost amount in NZ dollars" value="${amt||""}">
+ <select class="xt" aria-label="How this cost is divided"><option value="shared">Shared between travellers</option><option value="vehicle">Vehicle / group cost (not split)</option><option value="perperson">Per person</option></select>
+ <button type="button" class="rm" aria-label="Remove this cost"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>`;
+ row.querySelector(".xt").value=type||"shared";
+ row.querySelector(".rm").addEventListener("click",()=>{row.remove();tcCalc(true)});
+ row.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",()=>tcCalc(true)));
+ $("#tcExtras").appendChild(row);
+}
+function updateQuickCosts(){
+ const q=QUICK_COSTS[$("#tcDest").value]||[];
+ $("#tcQuick").innerHTML=q.map((c,i)=>`<button type="button" class="btn btn-ghost tc-quick" data-q="${i}"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> ${esc(c[0])} (${NZD.format(c[1])})</button>`).join(" ");
+ $$("#tcQuick button").forEach(b=>b.addEventListener("click",()=>{const c=q[+b.dataset.q];
+  const dup=tcExtrasList().some(e=>e.desc===c[0]&&e.amt===c[1]);
+  if(!dup){extraRow(c[0],c[1],c[2]);tcCalc(true)}}));
+}
+
+async function tcRoute(){
+ const dest=ACCESS[$("#tcDest").value];
+ tcStatus(`<span>Calculating route…</span>`);
+ $("#tcGo").classList.add("loading");$("#tcGo").disabled=true;
+ try{
+  const r=await routeDrive(TC.from.ll,dest.ll);
+  TC.route={...r,destName:dest.name,destKey:$("#tcDest").value,fromLabel:TC.from.label};
+  TC.manualKm=null;
+  tcStatus(`<span class="ok">Route found — approximate driving figures below.</span>`);
+ }catch(e){
+  TC.route=null;
+  const why=String(e.message||e);
+  let msg="We could not calculate a driving route between these locations.";
+  if(why==="routing-http")msg="The routing service is temporarily unavailable — try again in a minute.";
+  if(why==="from-not-road")msg="The departure location doesn't appear to be near a road — check the address and try again.";
+  if(why==="dest-not-road")msg="This destination is not accessible by normal road from that point — check the access notes in the hike guide.";
+  tcStatus(tcErr(msg+` You can enter a known road distance instead: <label for="tcManualKm" class="sr-only">Known one-way road distance in kilometres</label><input id="tcManualKm" type="number" min="0" step="1" style="width:90px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink)" placeholder="km"> km one-way (user-entered, not routed).`));
+  const mk=$("#tcManualKm");if(mk)mk.addEventListener("input",()=>{const v=Number(mk.value);TC.manualKm=(Number.isFinite(v)&&v>0)?v:null;tcCalc(true)});
+ }finally{
+  $("#tcGo").classList.remove("loading");$("#tcGo").disabled=false;
+ }
+ tcCalc(false);
+}
+
+function tcCalc(quiet){
+ const st=tcState(),cfg=RUC_CONFIG[st.vehicle];
+ const errs=tcValidate(st,cfg);
+ const oneWayKm=TC.route?TC.route.km:TC.manualKm;
+ if(!oneWayKm){if(!quiet&&errs.length)tcStatus(errs.map(tcErr).join(""));if(!TC.route&&!TC.manualKm)return}
+ if(errs.length){if(!quiet)tcStatus(errs.map(tcErr).join(""));return}
+ tcPersist();
+ if(!oneWayKm)return;
+ const ruc=currentRuc(st,cfg);
+ const r=computeTripCosts({oneWayKm,retn:st.retn,cons:Number(st.cons)||0,fuelPrice:Number(st.fuelPrice)||0,
+  fuelApplies:!!cfg.fuel,rucRate:ruc.rate,rucOn:(cfg.ruc!==false)&&st.rucOn,people:Number(st.people),extras:tcExtrasList()});
+ if(!Number.isFinite(r.groupTotal)||!Number.isFinite(r.perPerson)){tcStatus(tcErr("The calculation produced an invalid result — check the input values."));return}
+ const routed=!!TC.route;
+ const dn=routed?TC.route.destName:ACCESS[$("#tcDest").value].name;
+ const oneMin=routed?TC.route.min:null;
+ const rows=[];
+ const R=(l,v,tot)=>rows.push(`<div class="row${tot?" tot":""}"><span>${l}</span><b>${v}</b></div>`);
+ let out=`<div class="tc-card"><h5><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg> Trip summary</h5>`;
+ out+=`<div class="row"><span>From</span><b>${esc(TC.from.label)}</b></div>`;
+ out+=`<div class="row"><span>To</span><b>${esc(dn)}</b></div>`;
+ out+=`<div class="row"><span>Journey</span><b>${st.retn?"Return":"One-way"}</b></div>`;
+ out+=`<div class="row"><span>One-way distance</span><b>${oneWayKm.toFixed(0)} km ${routed?"(routed)":"(user-entered)"}</b></div>`;
+ out+=`<div class="row"><span>Total distance</span><b>${r.totalKm.toFixed(0)} km</b></div>`;
+ if(oneMin)out+=`<div class="row"><span>Driving time</span><b>~${Math.round(oneMin/60)} h ${Math.round(oneMin%60)} min one-way${st.retn?` · ~${Math.round(oneMin*2/60)} h return`:""}</b></div>`;
+ out+=`<div class="row"><span>Travellers</span><b>${st.people}</b></div>`;
+ if(routed&&TC.route.ferry)out+=`<div class="tc-warn"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> This route includes a ferry crossing — ferry fares are not included; add them as an additional cost.</div>`;
+ out+=`</div>`;
+ if(cfg.fuel){
+  out+=`<div class="tc-card"><h5><svg class="ic" aria-hidden="true"><use href="#i-fuel"/></svg> Fuel</h5>`;
+  out+=`<div class="row"><span>Consumption</span><b>${Number(st.cons).toFixed(1)} L/100 km</b></div>`;
+  out+=`<div class="row"><span>Fuel price</span><b>${NZD.format(st.fuelPrice)} / L</b></div>`;
+  out+=`<div class="row"><span>Estimated litres</span><b>${r.litres.toFixed(1)} L</b></div>`;
+  out+=`<div class="row"><span>Total fuel cost</span><b>${NZD.format(r.fuelCost)}</b></div>`;
+  out+=`<div class="row"><span>Fuel per person</span><b>${NZD.format(r.fuelPerPerson)}</b></div></div>`;
+ }else{
+  out+=`<div class="tc-card"><h5><svg class="ic" aria-hidden="true"><use href="#i-fuel"/></svg> Fuel</h5><div class="row"><span>Electric vehicle</span><b>No fuel cost estimated</b></div><p class="tc-hint">Charging costs vary widely — add one as an additional cost if you want it included.</p></div>`;
+ }
+ out+=`<div class="tc-card"><h5><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg> Road User Charges</h5>`;
+ out+=`<div class="row"><span>Vehicle</span><b>${cfg.label}</b></div>`;
+ out+=`<div class="row"><span>Category</span><b>${ruc.label}</b></div>`;
+ if(cfg.ruc===false){
+  out+=`<p class="tc-hint">${cfg.note}</p>`;
+ }else if(!st.rucOn){
+  out+=`<div class="tc-warn"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg> RUC has been excluded from this estimate. The total travel cost may therefore be understated.</div>`;
+ }else{
+  out+=`<div class="row"><span>Rate (${ruc.official?"official NZTA":"user-entered"})</span><b>${NZD.format(ruc.rate)} / 1,000 km</b></div>`;
+  out+=`<div class="row"><span>Per km</span><b>${NZD.format(r.rucPerKm)}</b></div>`;
+  out+=`<div class="row"><span>Total RUC</span><b>${NZD.format(r.rucCost)}</b></div>`;
+  out+=`<div class="row"><span>RUC per person</span><b>${NZD.format(r.rucPerPerson)}</b></div>`;
+  out+=`<div class="row"><span>Rates last checked</span><b>${RUC_META.checked}</b></div>`;
+ }
+ out+=`</div>`;
+ const ex=tcExtrasList();
+ if(ex.length){
+  out+=`<div class="tc-card"><h5><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Additional costs</h5>`;
+  ex.forEach(e=>{const t=e.type==="shared"?"shared":e.type==="vehicle"?"vehicle/group":"per person";out+=`<div class="row"><span>${esc(e.desc)} <em style="color:var(--ink3)">(${t})</em></span><b>${NZD.format(e.amt)}</b></div>`});
+  out+=`<div class="row tot"><span>Total additional</span><b>${NZD.format(r.sharedExtras+r.vehicleExtras+r.ppExtras*Number(st.people))}</b></div></div>`;
+ }
+ out+=`<div class="tc-total"><div class="grp"><div class="n">${NZD.format(r.groupTotal)}</div><div class="l">Whole group / vehicle</div></div><div class="pp"><div class="n">${NZD.format(r.perPerson)}</div><div class="l">Per person (${st.people})</div></div></div>`;
+ out+=`<details class="x"><summary><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg> How this was calculated<span class="chev"><svg class="ic" aria-hidden="true"><use href="#i-chev-d"/></svg></span></summary><div class="dx"><ul>
+  <li>Total distance = one-way distance ${st.retn?"× 2 (return)":"(one-way)"} = <b>${r.totalKm.toFixed(1)} km</b></li>
+  ${cfg.fuel?`<li>Fuel litres = ${r.totalKm.toFixed(1)} km × ${Number(st.cons).toFixed(1)} L/100 km ÷ 100 = <b>${r.litres.toFixed(1)} L</b></li>
+  <li>Fuel cost = ${r.litres.toFixed(1)} L × ${NZD.format(st.fuelPrice)}/L = <b>${NZD.format(r.fuelCost)}</b></li>`:""}
+  ${(cfg.ruc!==false&&st.rucOn)?`<li>RUC per km = ${NZD.format(ruc.rate)} ÷ 1,000 = <b>${NZD.format(r.rucPerKm)}</b></li>
+  <li>RUC cost = ${r.totalKm.toFixed(1)} km × ${NZD.format(r.rucPerKm)} = <b>${NZD.format(r.rucCost)}</b></li>`:""}
+  <li>Shared costs (fuel + RUC + shared extras) = <b>${NZD.format(r.sharedTotal)}</b>, divided equally by ${st.people} traveller(s)</li>
+  <li>Per person = ${NZD.format(r.sharedTotal)} ÷ ${st.people} + per-person costs ${NZD.format(r.ppExtras)} = <b>${NZD.format(r.perPerson)}</b></li>
+  <li>Group total = shared + vehicle/group costs + (per-person × travellers) = <b>${NZD.format(r.groupTotal)}</b></li></ul>
+  <p style="font-size:.8rem;color:var(--ink3)">The per-person figure assumes all costs marked as shared are divided equally. Vehicle/group costs are shown in the group total but not divided in the per-person figure. Distances and times are approximate.</p></div></details>`;
+ $("#tcResults").innerHTML=out;
+}
+
+function tcSuggest(){
+ const inp=$("#tcFrom"),list=$("#tcFromList");let t=null;
+ inp.addEventListener("input",()=>{clearTimeout(t);const q=inp.value.trim();TC.from=null;
+  if(q.length<3){list.hidden=true;return}
+  t=setTimeout(async()=>{
+   try{
+    const res=await geocodeNZ(q);
+    const rec=TC.recents.filter(r=>r.label.toLowerCase().includes(q.toLowerCase()));
+    const all=[...rec,...res].slice(0,6);
+    if(!all.length){list.innerHTML=`<button type="button" disabled>No New Zealand locations matched — try adding a town or city.</button>`;list.hidden=false;return}
+    list.innerHTML=all.map((f,i)=>`<button type="button" data-i="${i}">${esc(f.label)}${rec.includes(f)?' <span class="sub">recent</span>':""}</button>`).join("");
+    list.hidden=false;
+    $$("button",list).forEach(b=>b.addEventListener("click",()=>{const f=all[+b.dataset.i];TC.from=f;inp.value=f.label;list.hidden=true;
+     if(!TC.recents.some(r=>r.label===f.label)){TC.recents.unshift(f);TC.recents=TC.recents.slice(0,5)}tcPersist()}));
+   }catch(e){list.innerHTML=`<button type="button" disabled>Location search is temporarily unavailable.</button>`;list.hidden=false}
+  },350)});
+ document.addEventListener("click",e=>{if(!list.contains(e.target)&&e.target!==inp)list.hidden=true});
+ $("#tcGeo").addEventListener("click",()=>{
+  if(!navigator.geolocation){tcStatus(tcErr("This browser does not support location access."));return}
+  navigator.geolocation.getCurrentPosition(pos=>{
+   TC.from={label:"My current location",ll:[pos.coords.latitude,pos.coords.longitude]};
+   inp.value="My current location";tcStatus(`<span class="ok">Using your current location as the departure point.</span>`);tcPersist();
+  },()=>tcStatus(tcErr("Location permission was declined — type a departure address instead.")));
+ });
+}
+
+const TC_DEFAULTS={people:"2",fuelPrice:"2.75",cons:"8.0",vehicle:"petrol",retn:true};
+function buildBudget(){
+ $("#tcDest").innerHTML=HIKES.map(h=>`<option value="${h.id}">${esc(h.short)} — ${esc(ACCESS[h.id].name)}</option>`).join("");
+ $("#tcVehicle").innerHTML=Object.entries(RUC_CONFIG).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join("");
+ const saved=(()=>{try{return JSON.parse(sessionStorage.getItem("tc")||"null")}catch(e){return null}})();
+ if(saved){
+  if(saved.fromLL){TC.from={label:saved.fromLabel,ll:saved.fromLL};$("#tcFrom").value=saved.fromLabel}
+  TC.recents=saved.recents||[];
+  if(saved.dest&&ACCESS[saved.dest])$("#tcDest").value=saved.dest;
+  if(saved.vehicle&&RUC_CONFIG[saved.vehicle])$("#tcVehicle").value=saved.vehicle;
+  $("#tcPeople").value=saved.people||TC_DEFAULTS.people;
+  $("#tcFuelPrice").value=saved.fuelPrice||TC_DEFAULTS.fuelPrice;
+  $("#tcCons").value=saved.cons||TC_DEFAULTS.cons;
+  if(saved.retn===false){$("#tcRet").setAttribute("aria-pressed","false");$("#tcOne").setAttribute("aria-pressed","true")}
+ }
+ const destNote=()=>{$("#tcDestNote").textContent="Driving calculation ends at: "+ACCESS[$("#tcDest").value].name+". Road-access point from this site's verified track data."};
+ destNote();
+ $("#tcDest").addEventListener("change",()=>{TC.route=null;destNote();updateQuickCosts();tcCalc(true)});
+ $("#tcVehicle").addEventListener("change",()=>{updateRucUI();tcCalc(true)});
+ [["tcRet",true],["tcOne",false]].forEach(([id,ret])=>$("#"+id).addEventListener("click",()=>{
+  $("#tcRet").setAttribute("aria-pressed",ret);$("#tcOne").setAttribute("aria-pressed",!ret);tcCalc(true)}));
+ $("#tcPeoplePlus").addEventListener("click",()=>{const i=$("#tcPeople");i.value=Math.min(12,(parseInt(i.value)||1)+1);tcCalc(true)});
+ $("#tcPeopleMinus").addEventListener("click",()=>{const i=$("#tcPeople");i.value=Math.max(1,(parseInt(i.value)||2)-1);tcCalc(true)});
+ ["tcPeople","tcFuelPrice","tcCons"].forEach(id=>$("#"+id).addEventListener("input",()=>tcCalc(true)));
+ $("#tcAddCost").addEventListener("click",()=>extraRow("","","shared"));
+ $("#tcGo").addEventListener("click",()=>{
+  const st=tcState(),cfg=RUC_CONFIG[st.vehicle];
+  const errs=tcValidate(st,cfg).filter(e=>!e.includes("additional cost"));
+  if(!TC.from){tcStatus(tcErr("Enter a departure location, or use your current location."));return}
+  if(errs.length){tcStatus(errs.map(tcErr).join(""));return}
+  tcRoute();
+ });
+ $("#tcReset").addEventListener("click",()=>{
+  sessionStorage.removeItem("tc");TC.from=null;TC.route=null;TC.manualKm=null;TC.recents=[];
+  $("#tcFrom").value="";$("#tcPeople").value=TC_DEFAULTS.people;$("#tcFuelPrice").value=TC_DEFAULTS.fuelPrice;$("#tcCons").value=TC_DEFAULTS.cons;
+  $("#tcVehicle").value=TC_DEFAULTS.vehicle;$("#tcRet").setAttribute("aria-pressed","true");$("#tcOne").setAttribute("aria-pressed","false");
+  $("#tcExtras").innerHTML="";updateRucUI();updateQuickCosts();tcStatus("");
+  $("#tcResults").innerHTML=`<div class="panel tc-placeholder">Calculator reset to its documented defaults (petrol vehicle, 2 travellers, return trip, example fuel figures).</div>`;
+ });
+ updateRucUI();updateQuickCosts();tcSuggest();
+ document.addEventListener("click",e=>{const a=e.target.closest("[data-tcdest]");if(a){$("#tcDest").value=a.dataset.tcdest;$("#tcDest").dispatchEvent(new Event("change"))}});
+}
 /* ==================== SCROLL FX ==================== */
 function initHero(){
  const words=["Ten","tracks,","one","island","—","walked","on","paper,","checked","at","the","source."];
@@ -1701,7 +2191,7 @@ initHero();
 (function(){
  const t=Math.round(HIKES.reduce((a,h)=>a+h.distKm,0));
  const el=document.querySelector('#hero [data-suffix=" km"]');if(el)el.dataset.count=t;
- const maps={DIFFKEY,TYPEKEY,BUDGET_DEF,CMP_EXTRA,PHOTOS};
+ const maps={DIFFKEY,TYPEKEY,CMP_EXTRA,PHOTOS,ACCESS};
  for(const[n,m]of Object.entries(maps)){const miss=HIKES.filter(h=>!(h.id in m)).map(h=>h.id);if(miss.length)console.error("Data map "+n+" missing ids:",miss)}
 })();
 buildFilters();buildCards();buildCompare();renderHikes();buildBudget();initObservers();initScroll();initTheme();
